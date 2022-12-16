@@ -1,13 +1,13 @@
-// Pergunta do Dia Bot v0.0.1 - criado pelo Enzo da Órbita da Jogatina
+// Pergunta do Dia Bot v0.0.2 - criado pelo Enzo da Órbita da Jogatina
 // Código adaptado do discord.js Guide (https://discordjs.guide)
 
-"use strict";
+'use strict';
 
 const fs = require('fs');
 const logError = require('./core/logError');
 const botWeb = require('express')();
-const { Client, GatewayIntentBits, Partials } = require("discord.js");
-const dotenv = require("dotenv");
+const { Client, GatewayIntentBits, Partials } = require('discord.js');
+const dotenv = require('dotenv');
 dotenv.config();
 
 const supabase = require('@supabase/supabase-js');
