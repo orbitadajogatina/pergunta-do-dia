@@ -13,7 +13,10 @@ Use \`$$\` ao invés do emoji, assim: \`$$ - Feijão carioca\`.
 Use \`$link$\` ao invés do emoji, assim: \`$http://pudim.com.br/pudim.jpg$ - Pudim\`.
 
 • Enumerar automaticamente opções usando emojis (1 a 10)
-Use \`##\` ao invés do emoji, assim: \`## - Lápis\`.`);
+Use \`##\` ao invés do emoji, assim: \`## - Lápis\`.
+
+• Usar emojis normais
+Emojis escritos como \`:nomedoemoji:\` não funcionam, adicione usando seu teclado ou \`Windows + .\`. Para emojis do servidor, é necessário informar o ID, [saiba mais](https://support.discord.com/hc/en-us/community/posts/360069335891/comments/1500000646661).`);
 }
 
 module.exports = { properties, execute };
