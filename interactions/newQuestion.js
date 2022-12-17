@@ -1,6 +1,6 @@
 const fs = require('fs');
 const util = require('util');
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionsBitField } = require('discord.js');
 const gis = require('g-i-s');
 const Jimp = require('jimp');
 const transformQuestionsDataToEmbed = require('../core/transformQuestionsDataToEmbed');
@@ -86,7 +86,7 @@ async function execute (interaction) {
   await interaction.deferReply();
   
   const userID = interaction.user.id;
-  const userIsAdmin = userID == '668199172276748328' || interaction.member.permissions.has('ADMINISTRATOR');
+  const userIsAdmin = userID == '668199172276748328' || interaction.member.permissions.has([PermissionsBitField.Flags.Administrator]);
   const fields = interaction.fields;
   
   const arrayOptions = await parseOptions(fields.getTextInputValue('options'));
