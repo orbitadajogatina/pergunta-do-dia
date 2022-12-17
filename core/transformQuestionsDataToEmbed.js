@@ -24,7 +24,7 @@ module.exports = function transformQuestionsDataToEmbed (data, includeStatusAndD
     },
     {
       name: 'Data de Envio', 
-      value: data.sentAt ? `<t:${moment(data.sentAt).unix()}:R>` : '-', 
+      value: data.sentAt ? `<t:${moment(data.sentAt + '-03:00').unix()}:R>` : '-', 
       inline: true
     }
   );
