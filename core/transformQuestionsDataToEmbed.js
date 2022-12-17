@@ -19,7 +19,7 @@ module.exports = function transformQuestionsDataToEmbed (data, includeStatusAndD
     },
     {
       name: 'Data de Criação', 
-      value: data.createdAt ? `<t:${moment(data.createdAt).unix()}:R>` : `<t:${moment().unix()}:R>`, 
+      value: data.createdAt ? `<t:${moment(data.createdAt).add(3, 'hours').unix()}:R>` : `<t:${moment().unix()}:R>`, 
       inline: true
     },
     {
