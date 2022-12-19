@@ -44,7 +44,7 @@ function numberedListEmoji (index) {
 }
 
 async function parseEmojis (emoji, text, index) {
-  const nativeEmoji = emoji.match(/^<a?:.+?:\d{18}>|^\p{Emoji_Presentation}/u);
+  const nativeEmoji = emoji.match(/^<a?:.+?:\d{18}>|^\p{Extended_Pictographic}/u);
   const url = emoji.match(/^\$(.*?)\$/);
   
   if (url) { // url => emoji
