@@ -10,11 +10,12 @@ module.exports = function transformQuestionsDataToEmbed (data, includeStatusAndD
     .setColor('Random')
     .setTitle(data.question)
     .setDescription(`${data.description ? data.description : ''}\n\n${parseOptionsReverse(data.options)}\n\n${data.footer ? `_${data.footer}_` : ''}`)
-    
+
+
   if (includeStatusAndDates) questionEmbed.addFields(
     {
       name: 'Situação', 
-      value: ['Em análise', 'Negada', 'Aceita'][data.status], 
+      value: ['Em análise', 'Negada', 'Aceita', 'Enviada'][data.status], 
       inline: true
     },
     {

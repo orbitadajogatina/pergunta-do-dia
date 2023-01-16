@@ -48,7 +48,7 @@ async function execute(interaction) {
           .setStyle(TextInputStyle.Short)
       )
     );
-
+  
   await interaction.showModal(questionBuilder);
 }
 

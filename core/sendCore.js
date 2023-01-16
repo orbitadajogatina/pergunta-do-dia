@@ -67,7 +67,7 @@ async function sendQuestion (question) {
 
     if (question.id != 'factory') {
       const sentAt = moment.tz(moment(), 'America/Sao_Paulo').format();
-      await database.from('questions').update({sentAt: sentAt}).eq('id', question.id);
+      await database.from('questions').update({sentAt: sentAt, status: 3}).eq('id', question.id);
     }
   } catch (err) {
     message?.delete();
@@ -79,10 +79,9 @@ async function main () {
   sendQuestion(await chooseQuestion());
 }
 
-
 function runCron () {
   const CronJob = require('cron').CronJob;
-
+  
   new CronJob('0 12-20 * * *', () => {
     database.from('questions').select('sentAt').gte('sentAt', moment.tz(moment(), 'America/Sao_Paulo').format('YYYY-MM-DD')).then(res => {
       if (res.data.length == 0) {
@@ -94,4 +93,4 @@ function runCron () {
   }, null, true, 'America/Sao_Paulo');
 }
 
-module.exports = { main, runCron };
+module.exports = { main, sendQuestion, runCron };

@@ -3,12 +3,14 @@ const util = require('util');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionsBitField } = require('discord.js');
 const gis = require('g-i-s');
 const Jimp = require('jimp');
+const DiscordEmojis = require("discord-emojis-parser");
 const transformQuestionsDataToEmbed = require('../core/transformQuestionsDataToEmbed');
 
 const database = global.database;
 const bot = global.bot;
 
 async function emojiFromUrl(urls) {
+  console.log(urls)
   let chosenUrls = [];
   
   for (let index = 0; index < urls.length; index++) {
@@ -44,7 +46,8 @@ function numberedListEmoji (index) {
 }
 
 async function parseEmojis (emoji, text, index) {
-  const nativeEmoji = emoji.match(/^<a?:.+?:\d{18}>|^\p{Extended_Pictographic}/u);
+  const nativeEmoji = DiscordEmojis.parse(emoji)[0];
+  const serverEmoji =  emoji.match(/^<a?:.+?:\d{18}>/u);
   const url = emoji.match(/^\$(.*?)\$/);
   
   if (url) { // url => emoji
@@ -53,8 +56,10 @@ async function parseEmojis (emoji, text, index) {
     } catch (err) {
       throw err;
     }
-  } else if (nativeEmoji) { // emoji nativo ou de servidor
-    return nativeEmoji[0];
+  } else if (serverEmoji) { // emoji de servidor
+    return serverEmoji[0];
+  } else if (nativeEmoji) { // emoji nativo 
+    return nativeEmoji.unicode;
   } else if (emoji == '##') { // enumerar
     return numberedListEmoji(index);
   } else {
@@ -86,7 +91,7 @@ async function execute (interaction) {
   await interaction.deferReply();
   
   const userID = interaction.user.id;
-  const userIsAdmin = userID == '668199172276748328' || interaction.member.permissions.has([PermissionsBitField.Flags.Administrator]);
+  const userIsAdmin = userID == '668199172276748328' || interaction.member?.permissions.has([PermissionsBitField.Flags.Administrator]) || false;
   const fields = interaction.fields;
   
   const arrayOptions = await parseOptions(fields.getTextInputValue('options'));
@@ -99,7 +104,7 @@ async function execute (interaction) {
       description: fields.getTextInputValue('description'),
       footer: fields.getTextInputValue('footer'),
       author: userID,
-      status: userIsAdmin ? 2 : 0 // 0 => Aguardando; 1 => Recusado; 2 => Aprovado.
+      status: userIsAdmin ? 2 : 0 // 0 => Aguardando; 1 => Recusado; 2 => Aprovado; 3 => Enviada.
     };
     
     const questions = database.from('questions');
@@ -114,16 +119,16 @@ async function execute (interaction) {
         const buttons = new ActionRowBuilder()
           .addComponents(
             new ButtonBuilder()
-              .setCustomId(`setQuestionStatus_accept_${res.data[0].id}`)
-              .setLabel('Aceitar')
+              .setCustomId(`setQuestionStatus_approve_${res.data[0].id}`)
+              .setLabel('Aprovar')
               .setStyle(ButtonStyle.Success),
             new ButtonBuilder()
-            .setCustomId(`setQuestionStatus_refuse_${res.data[0].id}`)
-            .setLabel('Negar')
-            .setStyle(ButtonStyle.Danger)
+              .setCustomId(`setQuestionStatus_decline_${res.data[0].id}`)
+              .setLabel('Recusar')
+              .setStyle(ButtonStyle.Danger)
           );
 
-        (await bot.channels.fetch(process.env.MANAGE_CHANNEL_ID)).send({content: '**Nova pergunta!** Cuidado. Cada clique no botão significa uma mensagem na DM do autor.', embeds: [embed], components: [await buttons]});
+        (await bot.channels.fetch(process.env.MANAGE_CHANNEL_ID)).send({content: '**Nova pergunta!**', embeds: [embed], components: [buttons]});
       }
     });
   }

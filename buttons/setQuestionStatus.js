@@ -2,8 +2,6 @@ const database = global.database;
 const bot = global.bot;
 
 async function execute (interaction, statusNumber) {
-  await interaction.deferReply({ ephemeral: true });
-
   const statusText = ['Negada', 'Aceita'][statusNumber - 1];
   const message = interaction.message;
   const questionID = interaction.customId.split('_')[2];
@@ -14,21 +12,19 @@ async function execute (interaction, statusNumber) {
     if (res.error) throw res;
 
     embed.fields[0].value = statusText;
-    message.edit({content: `Pergunta ${statusText.toLowerCase()} por <@${interaction.user.id}>. Cuidado. Cada clique no botão significa uma mensagem na DM do autor.`, embeds: [embed]});
+    interaction.update({content: `Pergunta ${statusText.toLowerCase()} por <@${interaction.user.id}>.`, embeds: [embed], components: []});
 
     const authorDM = await bot.users.fetch(res.data[0].author);
     authorDM.send({content: `**${['Puxa...', 'Boa notícia!'][statusNumber - 1]}** Esta pergunta foi ${statusText.toLowerCase()}. ${statusNumber == 1 ? 'Quem sabe ela pode ser aceita se você reenviar alterando alguma coisa.' : ''}`, embeds: [embed]});
-
-    interaction.deleteReply();
   });
 }
 
-async function accept (interaction) {
+async function approve (interaction) {
   execute(interaction, 2);
 }
 
-async function refuse (interaction) {
+async function decline (interaction) {
   execute(interaction, 1);
 }
 
-module.exports = {accept, refuse}
+module.exports = {approve, decline}
