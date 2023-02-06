@@ -3,7 +3,7 @@ const { ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder, ButtonStyle } 
 const lodash = require('lodash');
 
 module.exports = function transformQuestionsDataToDropdown (data, page, dropdownID) {
-  const questions = data.map(question => ({label: question.question, value: `questionID_${question.id}`, emoji: ['⌛', '❌', '✅', '☑️'][question.status]}));
+  const questions = data.map(question => ({label: lodash.truncate(question.question, {'length': 25}), value: `questionID_${question.id}`, emoji: ['⌛', '❌', '✅', '☑️'][question.status]}));
   const questionsPerPage = lodash.chunk(questions, 25);
   if (page >= questionsPerPage.length || page < 0) page = 0;
 
