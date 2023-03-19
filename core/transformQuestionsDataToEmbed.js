@@ -6,11 +6,11 @@ function parseOptionsReverse (arrayOptions) {
 }
 
 module.exports = function transformQuestionsDataToEmbed (data, includeStatusAndDates) {
-  const questionEmbed = new EmbedBuilder()
+  let questionEmbed = new EmbedBuilder()
     .setColor('Random')
     .setTitle(data.question)
     .setDescription(`${data.description ? data.description : ''}\n\n${parseOptionsReverse(data.options)}\n\n${data.footer ? `_${data.footer}_` : ''}`)
-
+    .setImage(data.image);
 
   if (includeStatusAndDates) questionEmbed.addFields(
     {

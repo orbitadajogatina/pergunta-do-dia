@@ -9,7 +9,7 @@ module.exports = function transformQuestionsDataToDropdown (data, page, dropdown
 
   const items = new StringSelectMenuBuilder()
     .setCustomId(dropdownID)
-    .setPlaceholder('Selecionar uma pergunta...')
+    .setPlaceholder(`Selecionar uma pergunta... (${questions.length})`)
     .addOptions(questionsPerPage[page]);
 
   const previousPageButton = new ButtonBuilder()

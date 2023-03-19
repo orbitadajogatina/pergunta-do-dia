@@ -8,7 +8,7 @@ module.exports = {
   async execute (interaction) {
     if (interaction.isModalSubmit()) {
       try {
-        await require(`../interactions/${interaction.customId}`).execute(interaction);
+        await require(`../interactions/${interaction.customId.split('_')[0]}`).execute(interaction);
       } catch (error) {
         logError(error, interaction.customId);
         await interaction.editReply(`**Eita.** Há um errinho neste comando. Chama o Enzo pra resolver essa parada!\n\nSeu rascunho:\n${interaction.fields.fields.map(field => `${field.customId}: \`${field.value ? field.value : '-'}\``).join('\n')}\n\n\`\`\`\n${error}\`\`\``);

@@ -15,7 +15,7 @@ async function execute (interaction, statusNumber) {
     interaction.update({content: `Pergunta ${statusText.toLowerCase()} por <@${interaction.user.id}>.`, embeds: [embed], components: []});
 
     const authorDM = await bot.users.fetch(res.data[0].author);
-    authorDM.send({content: `**${['Puxa...', 'Boa notícia!'][statusNumber - 1]}** Esta pergunta foi ${statusText.toLowerCase()}. ${statusNumber == 1 ? 'Quem sabe ela pode ser aceita se você reenviar alterando alguma coisa.' : ''}`, embeds: [embed]});
+    authorDM.send({content: `**${['Puxa...', 'Boa notícia!'][statusNumber - 1]}** Esta pergunta foi ${statusText.toLowerCase()}. ${statusNumber == 1 ? 'Quem sabe ela pode ser aceita se você editá-la.' : 'Será enviada sabe-se lá quando.'}`, embeds: [embed]});
   });
 }
 

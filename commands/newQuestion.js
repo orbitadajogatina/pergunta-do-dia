@@ -46,6 +46,14 @@ async function execute(interaction) {
           .setMaxLength(200)
           .setRequired(false)
           .setStyle(TextInputStyle.Short)
+      ),
+      new ActionRowBuilder().addComponents(
+        new TextInputBuilder()
+          .setCustomId('image')
+          .setLabel('Imagem (URL)')
+          .setPlaceholder('Vem por último, após as opções e o rodapé.')
+          .setRequired(false)
+          .setStyle(TextInputStyle.Short)
       )
     );
   

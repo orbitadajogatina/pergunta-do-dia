@@ -6,9 +6,9 @@ async function execute (interaction) {
   if (userID == interaction.message.interaction.user.id) {
 		await interaction.deferUpdate();
 		
-		const optionID = interaction.values[0].slice(11);
+		const questionID = interaction.values[0].slice(11);
 		const questions = database.from('questions');
-		const embed = transformQuestionsDataToEmbed((await questions.select().eq('id', optionID)).data[0], true);
+		const embed = transformQuestionsDataToEmbed((await questions.select().eq('id', questionID)).data[0], true);
 
 		await interaction.editReply({ embeds: [(embed)] });
 	}
