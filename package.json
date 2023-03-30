@@ -14,7 +14,7 @@
     "axios": "^1.2.1",
     "cron": "^2.1.0",
     "discord-emojis-parser": "^1.0.4",
-    "discord.js": "^14.7.1",
+    "discord.js": "^14.8.0",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "g-i-s": "^2.1.6",
