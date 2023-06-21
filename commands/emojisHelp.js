@@ -5,8 +5,11 @@ const properties = new SlashCommandBuilder()
   .setDescription('Um guia de uso para emojis.');
 
 async function execute(interaction) {
-  await interaction.reply(`• Criar emojis usando imagens aleatórias do Google
-Use \`$$\` ao invés do emoji, assim: \`$$ - Feijão carioca\`.
+  await interaction.reply(`• Criar emojis usando imagens aleatórias da internet com base na opção
+Use \`$$\` ao invés do emoji, assim: \`$$ - Feijão carioca\`. Isso pesquisará por imagens de "Feijão carioca" na internet.
+
+• Criar emojis usando imagens aleatórias da internet com base em termos de consulta
+Use \`$pesquisa$\` ao invés do emoji, assim: \`$salada de frutas$ - James\`. Isso pesquisará por imagens de "Salada de frutas" na internet.
 
 • Criar emojis usando link de uma imagem
 Use \`$link$\` ao invés do emoji, assim: \`$http://pudim.com.br/pudim.jpg$ - Pudim\`.
