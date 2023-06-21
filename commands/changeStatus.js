@@ -22,7 +22,7 @@ async function chooseQuestionToChangeStatus (interaction) {
   await interaction.deferReply();
 
   const questions = database.from('questions');
-  const questionsData = (await questions.select('question, id, status, createdAt').is('sentAt', null)).data;
+  const questionsData = (await questions.select('question, id, status, createdAt').is('sentAt', null).order('createdAt', { ascending: false })).data;
   
   if (questionsData.length > 0) {
     const dropdown = transformQuestionsDataToDropdown(questionsData, 0, 'chooseQuestionToChangeStatus');

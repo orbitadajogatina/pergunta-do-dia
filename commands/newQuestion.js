@@ -5,7 +5,11 @@ const properties = new SlashCommandBuilder()
   .setDescription('Adicionar uma nova pergunta no banco de dados do bot. Será enviada sabe-se lá quando.');
 
 async function execute(interaction) {
-  const questionBuilder = new ModalBuilder()
+  await interaction.showModal(questionBuilder());
+}
+
+function questionBuilder() {
+  return new ModalBuilder()
     .setCustomId('newQuestion')
     .setTitle('Nova pergunta')
     .addComponents(
@@ -56,8 +60,6 @@ async function execute(interaction) {
           .setStyle(TextInputStyle.Short)
       )
     );
-  
-  await interaction.showModal(questionBuilder);
 }
 
-module.exports = { properties, execute };
+module.exports = { properties, execute, questionBuilder };

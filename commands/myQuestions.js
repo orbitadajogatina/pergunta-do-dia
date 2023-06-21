@@ -12,7 +12,7 @@ async function execute (interaction) {
   const userID = interaction.user.id;
   const questions = database.from('questions');
   const questionsData = (await questions.select('question, id, status, createdAt').eq('author', userID).order('createdAt', { ascending: false })).data.sort((a, b) => a.status - b.status);
-  
+
   if (questionsData.length > 0) {
     const dropdown = transformQuestionsDataToDropdown(questionsData, 0, 'selectMyQuestions');
     await interaction.editReply({ components: dropdown });

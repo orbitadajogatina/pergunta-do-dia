@@ -6,7 +6,7 @@ async function execute (interaction, page) {
   const userID = interaction.user.id;
   if (userID == interaction.message.interaction.user.id) {
     const questions = database.from('questions');
-    const questionsData = (await questions.select('question, id, status, createdAt').eq('status', 2).is('sentAt', null)).data;
+    const questionsData = (await questions.select('question, id, status, createdAt').eq('status', 2).is('sentAt', null).order('createdAt', { ascending: false })).data;
     
     if (questionsData.length > 0) {
       const oldComponents = interaction.message.components;

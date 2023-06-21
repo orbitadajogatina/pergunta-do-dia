@@ -9,28 +9,29 @@ async function selectQuestionToEdit (questionID, userID) {
 	const fieldsButton = new ActionRowBuilder()
 		.addComponents(
 			new ButtonBuilder()
-				.setCustomId(`editQuestion_question_${questionID}`)
+				.setCustomId(`editQuestion_editField_question_${questionID}`)
 				.setLabel('Alterar Pergunta')
 				.setStyle(ButtonStyle.Secondary),
 			new ButtonBuilder()
-				.setCustomId(`editQuestion_description_${questionID}`)
+				.setCustomId(`editQuestion_editField_description_${questionID}`)
 				.setLabel('Alterar Descrição')
 				.setStyle(ButtonStyle.Secondary),
 			new ButtonBuilder()
-				.setCustomId(`editQuestion_options_${questionID}`)
+				.setCustomId(`editQuestion_editField_options_${questionID}`)
 				.setLabel('Alterar Opções')
 				.setStyle(ButtonStyle.Secondary),
 			new ButtonBuilder()
-				.setCustomId(`editQuestion_footer_${questionID}`)
+				.setCustomId(`editQuestion_editField_footer_${questionID}`)
 				.setLabel('Alterar Notas de Rodapé')
 				.setStyle(ButtonStyle.Secondary),
 			new ButtonBuilder()
-				.setCustomId(`editQuestion_image_${questionID}`)
+				.setCustomId(`editQuestion_editField_image_${questionID}`)
 				.setLabel('Alterar Imagem')
 				.setStyle(ButtonStyle.Secondary)
 		);
 
 	const questionsData = (await database.from('questions').select('question, id, status, createdAt').eq('author', userID).is('sentAt', null).order('createdAt', { ascending: false })).data.sort((a, b) => a.status - b.status);
+	
 	const dropdown = transformQuestionsDataToDropdown(questionsData, 0, 'chooseQuestionToEdit');
 	return { embeds: [(embed)], components: [fieldsButton, ...dropdown] };
 }

@@ -11,7 +11,7 @@ Use \`$$\` ao invés do emoji, assim: \`$$ - Feijão carioca\`.
 • Criar emojis usando link de uma imagem
 Use \`$link$\` ao invés do emoji, assim: \`$http://pudim.com.br/pudim.jpg$ - Pudim\`.
 
-• Enumerar automaticamente opções usando emojis (1 a 10)
+• Enumerar automaticamente opções usando emojis (1 a 20)
 Use \`##\` ao invés do emoji, assim: \`## - Lápis\`.
 
 • Usar emojis normais

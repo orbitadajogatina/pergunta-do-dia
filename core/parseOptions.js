@@ -1,9 +1,10 @@
 const util = require('util');
-const gis = require('g-i-s');
+const ddg = require('duck-duck-scrape');
 const Jimp = require('jimp');
 const DiscordEmojis = require('discord-emojis-parser');
 
-async function emojiFromUrl(urls) {
+async function emojiFromURL(urls) {
+  if (urls.length < 1) throw 'Erro ao criar emoji com base em imagem.';
   let chosenUrls = [];
   
   for (let index = 0; index < urls.length; index++) {
@@ -40,12 +41,29 @@ function numberedListEmoji (index) {
 
 async function parseEmojis (emoji, text, index) {
   const nativeEmoji = DiscordEmojis.parse(emoji)[0];
-  const serverEmoji =  emoji.match(/^<a?:.+?:\d{18}>/u);
-  const url = emoji.match(/^\$(.*?)\$/);
+  const serverEmoji = emoji.match(/^<a?:.+?:\d{18}>/u);
+  const makeEmoji = emoji.match(/^\$(.*?)\$/);
   
-  if (url) { // url => emoji
+  if (makeEmoji) { // url, termo, pesquisa => emoji
     try {
-      return emojiFromUrl(url[1] ? [url[1]] : (await util.promisify(gis)({ searchTerm: text + ' png', queryStringAddition: '&hl=pt-BR&tbs=ic:trans'})).map(result => result.url).filter(url => url.endsWith('.png')));
+      const searchOptions = {
+        locale: 'pt-br',
+        type: ddg.ImageType.TRANSPARENT
+      };
+      const makeEmojiInput = makeEmoji[1];
+      let emojiURL;
+
+      if (!makeEmojiInput) {
+        const ddgSearch = (await ddg.searchImages(text, searchOptions)).results;
+        emojiURL = ddgSearch.map(result => result.image).filter(url => url.endsWith('.png'));
+      } else if (makeEmojiInput.startsWith('http') || makeEmojiInput.startsWith('https')) {
+        emojiURL = [makeEmojiInput];
+      } else if (makeEmojiInput) {
+        const ddgSearch = (await ddg.searchImages(makeEmojiInput, searchOptions)).results;
+        emojiURL = ddgSearch.map(result => result.image).filter(url => url.endsWith('.png'));
+      }
+
+      return emojiFromURL(emojiURL);
     } catch (err) {
       throw err;
     }
@@ -53,10 +71,10 @@ async function parseEmojis (emoji, text, index) {
     return serverEmoji[0];
   } else if (nativeEmoji) { // emoji nativo 
     return nativeEmoji.unicode;
-  } else if (emoji == '##') { // enumerar
+  } else if (emoji === '##') { // enumerar
     return numberedListEmoji(index);
   } else {
-    throw 'Parece que você não digitou um emoji válido. Dá uma olhada no comando /emojis para mais informações.'
+    throw `Parece que "${emoji}" não é um emoji válido. Dá uma olhada no comando /emojis para mais informações.`
   }
 }
 
@@ -90,5 +108,6 @@ module.exports = async function parseOptions (textOptions) {
   
   if (hasDuplicateEmoji) throw 'Mano, você botou emojis duplicados.';
   if (hasDuplicateText) throw 'Mano, você fez opções duplicadas.';
+
   return formattedArrayOptions;
 }

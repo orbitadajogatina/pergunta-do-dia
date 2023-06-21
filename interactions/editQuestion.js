@@ -25,15 +25,12 @@ async function execute (interaction) {
 
   const fields = interaction.fields;
   const infoOnId = interaction.customId.split('_');
-  const changedField = infoOnId[1];
-  const questionID = infoOnId[2];
+  const changedField = infoOnId[2];
+  const questionID = infoOnId[3];
 
   let changedQuestionObject = { status: userIsAdmin ? 2 : 0 }; // 0 => Aguardando; 1 => Recusado; 2 => Aprovado; 3 => Enviada.
   const newValue = await newValueOfField(changedField, fields);
-  if (newValue === undefined) {
-    interaction.editReply(`**Se liga, hein.** Você não formatou corretamente as opções e/ou os emojis ou apenas inseriu uma (mínimo é 2; máximo é 20).\n\nSempre use \`Emoji - Texto\`. Saiba mais sobre emojis no comando \`/emojis\`.\n\nSeu rascunho:\n${fields.fields.map(field => `${field.customId}: \`${field.value ? field.value : '-'}\``).join('\n')}`);
-    return;
-  }
+  if (newValue === undefined) throw `Se liga, hein. Você não formatou corretamente as opções e/ou os emojis ou apenas inseriu uma (mínimo é 2; máximo é 20).\n\nSempre use \`Emoji - Texto\`. Saiba mais sobre emojis no comando \`/emojis\`.`;
   changedQuestionObject[changedField] = newValue;
 
   const questions = database.from('questions');

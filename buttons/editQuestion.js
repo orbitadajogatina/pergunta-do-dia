@@ -1,99 +1,27 @@
-const { ModalBuilder, TextInputBuilder, ActionRowBuilder, TextInputStyle } = require('discord.js');
+const { ModalBuilder } = require('discord.js');
+const { questionBuilder } = require('../commands/newQuestion.js');
 
-async function question (interaction) {
-  const questionBuilder = new ModalBuilder()
-    .setCustomId(interaction.customId)
-    .setTitle('Editar pergunta')
-    .addComponents(
-      new ActionRowBuilder().addComponents(
-        new TextInputBuilder()
-          .setCustomId('question')
-          .setLabel('Pergunta')
-          .setPlaceholder('Fica em negrito.')
-          .setMinLength(5)
-          .setMaxLength(150)
-          .setRequired(true)
-          .setStyle(TextInputStyle.Short)    
-      )
-    );
-  
-  await interaction.showModal(questionBuilder);
+async function editField (interaction) {
+  const infoOnID = interaction.customId.split('_');
+  const fieldToEdit = infoOnID[2];
+  const questionID = infoOnID[3];
+
+  const questions = database.from('questions');
+  const question = (await questions.select().eq('id', questionID)).data[0];
+  const oldValue = fieldToEdit === 'options' ? question[fieldToEdit].map(({emoji, text}) => `${emoji} - ${text}`).join('\n') : question[fieldToEdit];
+
+  await interaction.showModal(questionEditBuilder(fieldToEdit, interaction.customId, oldValue));
 }
 
-async function options (interaction) {
-  const questionBuilder = new ModalBuilder()
-    .setCustomId(interaction.customId)
+function questionEditBuilder(fieldToEdit, id, oldValue) {
+  const questionForm = questionBuilder();
+  let component = questionForm.components.find(component => component.components[0].data.custom_id === fieldToEdit);
+  if (oldValue) component.components[0].setValue(oldValue);
+
+  return new ModalBuilder()
+    .setCustomId(id)
     .setTitle('Editar pergunta')
-    .addComponents(
-      new ActionRowBuilder().addComponents(
-        new TextInputBuilder()
-          .setCustomId('options')
-          .setLabel('Opções')
-          .setPlaceholder('Formatação: "👍 - Sim" por linha. Conheça recursos avançados usando o comando /emojis')
-          .setMinLength(6)
-          .setMaxLength(500)
-          .setRequired(true)
-          .setStyle(TextInputStyle.Paragraph)
-      )
-    );
-  
-  await interaction.showModal(questionBuilder);
+    .addComponents(component);
 }
 
-async function description (interaction) {
-  const questionBuilder = new ModalBuilder()
-    .setCustomId(interaction.customId)
-    .setTitle('Editar pergunta')
-    .addComponents(
-      new ActionRowBuilder().addComponents(
-        new TextInputBuilder()
-          .setCustomId('description')
-          .setLabel('Descrição')
-          .setPlaceholder('Contextualização. Fica em baixo da pergunta.')
-          .setMaxLength(350)
-          .setRequired(false)
-          .setStyle(TextInputStyle.Paragraph)
-      )
-    );
-  
-  await interaction.showModal(questionBuilder);
-}
-
-async function footer (interaction) {
-  const questionBuilder = new ModalBuilder()
-    .setCustomId(interaction.customId)
-    .setTitle('Editar pergunta')
-    .addComponents(
-      new ActionRowBuilder().addComponents(
-        new TextInputBuilder()
-          .setCustomId('footer')
-          .setLabel('Notas de Rodapé')
-          .setPlaceholder('Fica em itálico e vem depois das opções.')
-          .setMaxLength(200)
-          .setRequired(false)
-          .setStyle(TextInputStyle.Short)
-      )
-    );
-  
-  await interaction.showModal(questionBuilder);
-}
-
-async function image (interaction) {
-  const questionBuilder = new ModalBuilder()
-    .setCustomId(interaction.customId)
-    .setTitle('Editar pergunta')
-    .addComponents(
-      new ActionRowBuilder().addComponents(
-        new TextInputBuilder()
-          .setCustomId('image')
-          .setLabel('Imagem (URL)')
-          .setPlaceholder('Vem por último, após as opções e o rodapé.')
-          .setRequired(false)
-          .setStyle(TextInputStyle.Short)
-      )
-    );
-  
-  await interaction.showModal(questionBuilder);
-}
-
-module.exports = {question, options, description, footer, image}
+module.exports = {editField, questionEditBuilder}

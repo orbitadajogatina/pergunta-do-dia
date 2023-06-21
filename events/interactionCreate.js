@@ -1,3 +1,4 @@
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js')
 const logError = require('../core/logError');
 
 // Isso aqui poderia ser feito de uma forma melhor. Quem sabe depois.
@@ -10,8 +11,18 @@ module.exports = {
       try {
         await require(`../interactions/${interaction.customId.split('_')[0]}`).execute(interaction);
       } catch (error) {
-        logError(error, interaction.customId);
-        await interaction.editReply(`**Eita.** Há um errinho neste comando. Chama o Enzo pra resolver essa parada!\n\nSeu rascunho:\n${interaction.fields.fields.map(field => `${field.customId}: \`${field.value ? field.value : '-'}\``).join('\n')}\n\n\`\`\`\n${error}\`\`\``);
+        // logError(error, interaction.customId);
+        console.log(error)
+
+        const retryButton = new ActionRowBuilder()
+        .addComponents(
+          new ButtonBuilder()
+            .setCustomId(`retry_${interaction.customId}`)
+            .setLabel('Tentar novamente')
+            .setStyle(ButtonStyle.Secondary)
+        );
+
+        await interaction.editReply({content: `**Eita.** Há um errinho neste comando. Chama o Enzo pra resolver essa parada!\n\nSeu rascunho:\n${interaction.fields.fields.map(field => `${field.customId}: \`${field.value ? field.value : '-'}\``).join('\n')}\n\n\`\`\`\n${error}\`\`\``, components: [retryButton]});
       }
     } else if (interaction.isStringSelectMenu()) {
       try {

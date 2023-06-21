@@ -13,44 +13,42 @@ async function execute (interaction) {
   const fields = interaction.fields;
   
   const arrayOptions = await parseOptions(fields.getTextInputValue('options'));
-  if (arrayOptions.length < 2) {
-    interaction.editReply(`**Se liga, hein.** Você não formatou corretamente as opções e/ou os emojis ou apenas inseriu uma (mínimo é 2; máximo é 20).\n\nSempre use \`Emoji - Texto\`. Saiba mais sobre emojis no comando \`/emojis\`.\n\nSeu rascunho:\n${fields.fields.map(field => `${field.customId}: \`${field.value ? field.value : '-'}\``).join('\n')}`);
-  } else {
-    const newQuestionObject = {
-      question: fields.getTextInputValue('question'),
-      options: arrayOptions,
-      description: fields.getTextInputValue('description'),
-      footer: fields.getTextInputValue('footer'),
-      image: /^https?:\/\/.*\.(jpeg|jpg|gif|png)(\?.*)?$/i.test(fields.getTextInputValue('image')) ? fields.getTextInputValue('image') : null,
-      author: userID,
-      status: userIsAdmin ? 2 : 0 // 0 => Aguardando; 1 => Recusado; 2 => Aprovado; 3 => Enviada.
-    };
+  if (arrayOptions.length < 2) throw `Se liga, hein. Você não formatou corretamente as opções e/ou os emojis ou apenas inseriu uma (mínimo é 2; máximo é 20).\n\nSempre use \`Emoji - Texto\`. Saiba mais sobre emojis no comando \`/emojis\`.`;
+
+  const newQuestionObject = {
+    question: fields.getTextInputValue('question'),
+    options: arrayOptions,
+    description: fields.getTextInputValue('description'),
+    footer: fields.getTextInputValue('footer'),
+    image: /^https?:\/\/.*\.(jpeg|jpg|gif|png)(\?.*)?$/i.test(fields.getTextInputValue('image')) ? fields.getTextInputValue('image') : null,
+    author: userID,
+    status: userIsAdmin ? 2 : 0 // 0 => Aguardando; 1 => Recusado; 2 => Aprovado; 3 => Enviada.
+  };
+  
+  const questions = database.from('questions');
+  questions.insert(newQuestionObject).select().then(async res => {
+    if (res.error) throw res;
     
-    const questions = database.from('questions');
-    questions.insert(newQuestionObject).select().then(async res => {
-      if (res.error) throw res;
-      
-      const nextStep = userIsAdmin ? 'será enviada sabe-se lá quando.' : 'será analisada. Fique de olho na DM para saber se ela foi aceita ou não. Você também pode usar `/minhas-perguntas` para rever suas perguntas.'
-      interaction.editReply(`**Show de bola!** Sua pergunta foi criada e ${nextStep}`);
+    const nextStep = userIsAdmin ? 'será enviada sabe-se lá quando.' : 'será analisada. Fique de olho na DM para saber se ela foi aceita ou não. Você também pode usar `/minhas-perguntas` para rever suas perguntas.'
+    interaction.editReply(`**Show de bola!** Sua pergunta foi criada e ${nextStep}`);
 
-      if (!userIsAdmin) {
-        const embed = transformQuestionsDataToEmbed(res.data[0], true);
-        const buttons = new ActionRowBuilder()
-          .addComponents(
-            new ButtonBuilder()
-              .setCustomId(`setQuestionStatus_approve_${res.data[0].id}`)
-              .setLabel('Aprovar')
-              .setStyle(ButtonStyle.Success),
-            new ButtonBuilder()
-              .setCustomId(`setQuestionStatus_decline_${res.data[0].id}`)
-              .setLabel('Recusar')
-              .setStyle(ButtonStyle.Danger)
-          );
+    if (!userIsAdmin) {
+      const embed = transformQuestionsDataToEmbed(res.data[0], true);
+      const buttons = new ActionRowBuilder()
+        .addComponents(
+          new ButtonBuilder()
+            .setCustomId(`setQuestionStatus_approve_${res.data[0].id}`)
+            .setLabel('Aprovar')
+            .setStyle(ButtonStyle.Success),
+          new ButtonBuilder()
+            .setCustomId(`setQuestionStatus_decline_${res.data[0].id}`)
+            .setLabel('Recusar')
+            .setStyle(ButtonStyle.Danger)
+        );
 
-        (await bot.channels.fetch(process.env.MANAGE_CHANNEL_ID)).send({content: '**Nova pergunta!**', embeds: [embed], components: [buttons]});
-      }
-    });
-  }
+      (await bot.channels.fetch(process.env.MANAGE_CHANNEL_ID)).send({content: '**Nova pergunta!**', embeds: [embed], components: [buttons]});
+    }
+  });
 }
 
 module.exports = {execute}
