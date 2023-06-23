@@ -1,4 +1,4 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionsBitField } = require('discord.js');
 const { selectQuestionToEdit } = require('../interactions/chooseQuestionToEdit');
 const transformQuestionsDataToEmbed = require('../core/transformQuestionsDataToEmbed');
 const parseOptions = require('../core/parseOptions');
