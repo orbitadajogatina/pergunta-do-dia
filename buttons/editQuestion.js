@@ -8,7 +8,7 @@ async function editField (interaction) {
 
   const questions = database.from('questions');
   const question = (await questions.select().eq('id', questionID)).data[0];
-  const oldValue = fieldToEdit === 'options' ? question[fieldToEdit].map(({emoji, text}) => `${emoji} - ${text}`).join('\n') : question[fieldToEdit];
+  const oldValue = fieldToEdit === 'options' ? question[fieldToEdit].map(({emoji, text}) => `${emoji.replace(/\[Imagem\]\((.*?)\)/, '$1')} - ${text}`).join('\n') : question[fieldToEdit];
 
   await interaction.showModal(questionEditBuilder(fieldToEdit, interaction.customId, oldValue));
 }

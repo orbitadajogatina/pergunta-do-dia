@@ -29,7 +29,6 @@ function questionBuilder() {
           .setLabel('Opções')
           .setPlaceholder('Formatação: "👍 - Sim" por linha. Conheça recursos avançados usando o comando /emojis')
           .setMinLength(6)
-          .setMaxLength(500)
           .setRequired(true)
           .setStyle(TextInputStyle.Paragraph)
       ),

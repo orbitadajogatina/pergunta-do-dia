@@ -1,7 +1,7 @@
 # Pergunta do Dia Bot
 Uma nova pergunta todos os dias no PowerPoint: Discord. As perguntas causam conversas e debates significativos. Isso ajudará você a aprender mais sobre as pessoas com quem interage, bem como suas opiniões e perspectivas. Há uma ampla gama de tópicos com uma curadoria feita por administradores do servidor e APIs.
 
-**v0.4.0**
+**v0.4.2**
 ## Variáveis de Ambiente (.env)
 
 ```

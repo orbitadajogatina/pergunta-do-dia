@@ -1,4 +1,3 @@
-const util = require('util');
 const ddg = require('duck-duck-scrape');
 const Jimp = require('jimp');
 const DiscordEmojis = require('discord-emojis-parser');
@@ -25,8 +24,10 @@ async function emojiFromURL(urls) {
     } catch (err) {
       if (urls.length == 1 && err.toString().includes('Could not find MIME')) {
         throw `Link não é uma imagem. Verifique o link antes de usar no bot.\n${err}`;
-      } else if (!err.toString().includes('Could not find MIME')) {
+      } else if (urls.length == 1) {
         throw err;
+      } else {
+        continue;
       }
     }
   }
