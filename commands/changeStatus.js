@@ -1,6 +1,5 @@
 const { SlashCommandBuilder, PermissionsBitField } = require('discord.js');
-const database = global.database;
-const transformQuestionsDataToDropdown = require('../core/transformQuestionsDataToDropdown');
+const { makeMessageWithDropdownsAndButtons, questionsDataByCommand } = require('../core/chooseQuestion');
 
 const properties = new SlashCommandBuilder()
   .setName('alterar-situação')
@@ -8,28 +7,18 @@ const properties = new SlashCommandBuilder()
   .setDefaultMemberPermissions(0)
   .setDMPermission(false);
 
-function execute (interaction) {
+async function execute (interaction) {
   const userIsAdmin = interaction.user.id == '668199172276748328' || interaction.member.permissions.has([PermissionsBitField.Flags.Administrator]);
 
-  if (userIsAdmin) {
-    chooseQuestionToChangeStatus(interaction);
-  } else {
-    interaction.reply({content: '**Irmão, esqueça.** Você não é admin, não adianta.', ephemeral: true})
+  if (!userIsAdmin) {
+    interaction.reply({content: '**Irmão, esqueça.** Você não é admin, não adianta.', ephemeral: true});
+    return;
   }
-}
 
-async function chooseQuestionToChangeStatus (interaction) {
   await interaction.deferReply();
-
-  const questions = database.from('questions');
-  const questionsData = (await questions.select('question, id, status, createdAt').is('sentAt', null).order('createdAt', { ascending: false })).data;
-  
-  if (questionsData.length > 0) {
-    const dropdown = transformQuestionsDataToDropdown(questionsData, 0, 'chooseQuestionToChangeStatus');
-    await interaction.editReply({ components: dropdown });
-  } else {
-    await interaction.editReply('💀 Tamo sem pergunta.');
-  }
+  const questionsData = await questionsDataByCommand.changeStatusOfQuestion(interaction);
+  const messageWithDropdownsAndButtons = makeMessageWithDropdownsAndButtons(questionsData, 'chooseQuestion_changeStatusOfQuestion', '💀 Tamo sem pergunta.');
+  interaction.editReply(messageWithDropdownsAndButtons);
 }
 
-module.exports = { properties, execute };
+module.exports = { properties, execute, id: 'changeStatus' };

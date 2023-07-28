@@ -1,7 +1,6 @@
 'use strict';
 
 const fs = require('fs');
-const bot = global.bot;
 
 async function deployEvents() {
 	const eventFiles = fs.readdirSync('./events').filter(event => event.endsWith('.js'));

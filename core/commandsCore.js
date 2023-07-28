@@ -2,7 +2,6 @@
 
 const { REST, Routes, Collection } = require('discord.js');
 const fs = require('fs');
-const bot = global.bot;
 const clientID = process.env.DISCORD_CLIENT_ID;
 
 const commands = [];

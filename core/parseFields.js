@@ -1,9 +1,10 @@
 const ddg = require('duck-duck-scrape');
 const Jimp = require('jimp');
+const axios = require('axios');
 const DiscordEmojis = require('discord-emojis-parser');
 
 async function emojiFromURL(urls) {
-  if (urls.length < 1) throw 'Erro ao criar emoji com base em imagem.';
+  if (urls.length < 1) throw {from: 'user', content: 'Erro ao criar emoji com base em imagem.'};
   let chosenUrls = [];
   
   for (let index = 0; index < urls.length; index++) {
@@ -17,13 +18,13 @@ async function emojiFromURL(urls) {
       if (compressedImage.byteLength / 1024 <= 256) {
         chosenUrls.push(currentUrl);
       } else if (compressedImage.byteLength / 1024 > 256 && urls.length == 1) {
-        throw 'Imagem muito grande. Escolha uma menor.';
+        throw {from: 'user', content: 'Imagem muito grande. Escolha uma menor.'};
       }
 
       if (chosenUrls.length == 3) break;
     } catch (err) {
       if (urls.length == 1 && err.toString().includes('Could not find MIME')) {
-        throw `Link não é uma imagem. Verifique o link antes de usar no bot.\n${err}`;
+        throw {from: 'user', content: `Link não é uma imagem. Verifique o link antes de usar no bot.\n${err}`};
       } else if (urls.length == 1) {
         throw err;
       } else {
@@ -75,11 +76,11 @@ async function parseEmojis (emoji, text, index) {
   } else if (emoji === '##') { // enumerar
     return numberedListEmoji(index);
   } else {
-    throw `Parece que "${emoji}" não é um emoji válido. Dá uma olhada no comando /emojis para mais informações.`
+    throw {from: 'user', content: `Parece que "${emoji}" não é um emoji válido. Dá uma olhada no comando /emojis para mais informações.`}
   }
 }
 
-module.exports = async function parseOptions (textOptions) {
+async function parseOptions (textOptions) {
   const arrayOptions = textOptions.split('\n').filter(option => option).splice(0, 20);
   let formattedArrayOptions = [];
   
@@ -107,8 +108,37 @@ module.exports = async function parseOptions (textOptions) {
     }).length > 0;
   });
   
-  if (hasDuplicateEmoji) throw 'Mano, você botou emojis duplicados.';
-  if (hasDuplicateText) throw 'Mano, você fez opções duplicadas.';
+  if (hasDuplicateEmoji) throw {from: 'user', content: 'Mano, você botou emojis duplicados.'};
+  if (hasDuplicateText) throw {from: 'user', content: 'Mano, você fez opções duplicadas.'};
+  if (formattedArrayOptions.length < 2) throw {from: 'user', content: `Se liga, hein. Você não formatou corretamente as opções e/ou os emojis ou apenas inseriu uma (mínimo é 2; máximo é 20).\n\nSempre use \`Emoji - Texto\`. Saiba mais sobre emojis no comando \`/emojis\`.`};
 
   return formattedArrayOptions;
 }
+
+async function parseImage (url, questionQuestion) {
+  if (!url) return null;
+  
+  const searchImage = url.match(/^\$(.*?)\$/);
+  if (searchImage) {
+    const searchOptions = {
+      locale: 'pt-br'
+    };
+    const searchImageInput = searchImage[1];
+
+    if (searchImageInput.startsWith('http') || searchImageInput.startsWith('https')) {
+      url = searchImageInput;
+    } else {
+      const ddgSearch = (await ddg.searchImages(searchImageInput || questionQuestion, searchOptions)).results;
+      const results = ddgSearch.map(result => result.image).slice(0, 5);
+      url = results[Math.floor(Math.random() * results.length)];
+    }
+  } else {
+    const imageContent = await axios.get(url, { responseType: 'stream' });
+    const contentType = imageContent.headers['content-type'];
+    if (!contentType.startsWith('image')) throw {from: 'user', content: 'Se liga, hein. Parece que você não colocou o URL de uma imagem válida.'};
+  }
+
+  return url;
+}
+
+module.exports = {parseOptions, parseImage}

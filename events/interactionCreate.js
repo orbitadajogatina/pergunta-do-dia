@@ -1,54 +1,112 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js')
-const logError = require('../core/logError');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
-// Isso aqui poderia ser feito de uma forma melhor. Quem sabe depois.
+function getInteractionType(interaction) {
+  const interactionTypeMapping = {
+    isModalSubmit: "modalSubmit",
+    isStringSelectMenu: "stringSelectMenu",
+    isButton: "button",
+    isChatInputCommand: "chatInputCommand"
+  };
+
+  let interactionType;
+
+  for (const methodName in interactionTypeMapping) {
+    if (interaction[methodName]?.()) {
+      interactionType = interactionTypeMapping[methodName];
+      break;
+    }
+  }
+
+  return interactionType;
+}
 
 module.exports = {
 	name: 'interactionCreate',
   once: false,
   async execute (interaction) {
-    if (interaction.isModalSubmit()) {
-      try {
-        await require(`../interactions/${interaction.customId.split('_')[0]}`).execute(interaction);
-      } catch (error) {
-        // logError(error, interaction.customId);
-        console.log(error)
+    const interactionType = getInteractionType(interaction);
+    if (!interactionType) return;
+    const interactionID = interaction.customId || (bot.commands.get(interaction.commandName)).id;
+    const userID = interaction.user.id;
+    const dataOnID = interactionID.split('_');
+    const filename = dataOnID[0];
+    const functionToExecute = dataOnID[1] || 'execute';
+    
+    const interactionsPropertiesByType = {
+      modalSubmit: {
+        path: '../interactions/',
+        actionOnError: 'editReply',
+        messageOnCodeError: (interaction, error) => {
+          const retryButton = new ActionRowBuilder()
+            .addComponents(
+              new ButtonBuilder()
+                .setCustomId(`retry_${interaction.customId}`)
+                .setLabel('Tentar novamente')
+                .setStyle(ButtonStyle.Secondary)
+            );
+          const userDraft = interaction.fields.fields.map(field => `${field.customId}: \`${field.value ? field.value : '-'}\``).join('\n');
 
-        const retryButton = new ActionRowBuilder()
-        .addComponents(
-          new ButtonBuilder()
-            .setCustomId(`retry_${interaction.customId}`)
-            .setLabel('Tentar novamente')
-            .setStyle(ButtonStyle.Secondary)
-        );
+          return {
+            content: `**Eita, <@${interaction.user.id}>.** Há um errinho neste comando. Chama o Enzo pra resolver essa parada!\n\nSeu rascunho:\n${userDraft}\n\n\`\`\`\n${error}\`\`\``,
+            components: [retryButton],
+            embeds: []
+          }
+        },
+        messageOnUserError: (interaction, error) => {
+          const retryButton = new ActionRowBuilder()
+            .addComponents(
+              new ButtonBuilder()
+                .setCustomId(`retry_${interaction.customId}`)
+                .setLabel('Tentar novamente')
+                .setStyle(ButtonStyle.Secondary)
+            );
+          const userDraft = interaction.fields.fields.map(field => `${field.customId}: \`${field.value ? field.value : '-'}\``).join('\n');
 
-        await interaction.editReply({content: `**Eita.** Há um errinho neste comando. Chama o Enzo pra resolver essa parada!\n\nSeu rascunho:\n${interaction.fields.fields.map(field => `${field.customId}: \`${field.value ? field.value : '-'}\``).join('\n')}\n\n\`\`\`\n${error}\`\`\``, components: [retryButton]});
+          return {
+            content: `${error.content}\n\nRascunho de <@${interaction.user.id}>:\n${userDraft}`,
+            components: [retryButton],
+            embeds: []
+          }
+        }
+      },
+      stringSelectMenu: {
+        path: '../interactions/',
+        actionOnError: 'editReply'
+      },
+      button: {
+        path: '../buttons/',
+        actionOnError: 'editReply'
+      },
+      chatInputCommand: {
+        path: '../commands/',
+        actionOnError: 'reply'
       }
-    } else if (interaction.isStringSelectMenu()) {
-      try {
-        await require(`../interactions/${interaction.customId}`).execute(interaction);
-      } catch (error) {
-        logError(error, interaction.customId);
-        await interaction.editReply({content: `**Eita.** Há um errinho neste comando. Chama o Enzo pra resolver essa parada!\n\n\`\`\`\n${error}\`\`\``, components: []});
+    };
+    const interactionProperties = interactionsPropertiesByType[interactionType] 
+
+    try {
+      await require(interactionProperties.path + filename)[functionToExecute](interaction);
+    } catch (error) {
+      // se não tiver .type no erro, então provavelmente é um erro do código
+      if (error.from === 'user') {
+        const defaultErrorMessage = {
+          content: error.content,
+          components: [],
+          embeds: []
+        }
+        const errorMessage = interactionProperties.messageOnUserError ? interactionProperties.messageOnUserError(interaction, error) : defaultErrorMessage;
+        await interaction[interactionProperties.actionOnError](errorMessage);
+      } else {
+        console.error(error, interactionType, interactionID);
+
+        const defaultErrorMessage = {
+          content: `**Eita.** Há um errinho neste comando. Chama o Enzo pra resolver essa parada!\n\n\`\`\`\n${error}\`\`\``,
+          components: [],
+          embeds: []
+        }
+        const errorMessage = interactionProperties.messageOnCodeError ? interactionProperties.messageOnCodeError(interaction, error) : defaultErrorMessage;
+        await interaction[interactionProperties.actionOnError](errorMessage);
       }
-    } else if (interaction.isChatInputCommand()) {
-      const command = bot.commands.get(interaction.commandName);
-      try {
-        await command.execute(interaction);
-      } catch (error) {
-        logError(error, command.properties.name);
-        await interaction.reply(`**Eita.** Há um errinho neste comando. Chama o Enzo pra resolver essa parada!\n\n\`\`\`\n${error}\`\`\``);
-      }
-    } else if (interaction.isButton()) {
-      try {
-        const buttonsIDs = interaction.customId.split('_');
-        await require(`../buttons/${buttonsIDs[0]}`)[buttonsIDs[1]](interaction);
-      } catch (error) {
-        logError(error, interaction.customId);
-        await interaction.editReply(`**Eita.** Há um errinho neste comando. Chama o Enzo pra resolver essa parada!\n\n\`\`\`\n${error}\`\`\``);
-      }
-    } else {
-      return;
     }
   }
 }

@@ -1,7 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
 const moment = require('moment-timezone');
-const bot = global.bot;
-const database = global.database;
 
 const properties = new SlashCommandBuilder()
   .setName('estatísticas')
@@ -9,21 +7,30 @@ const properties = new SlashCommandBuilder()
   .addSubcommand(subcommand =>
       subcommand
         .setName('perguntas')
-        .setDescription('Ver quantidade de perguntas em cada estado e previsões.'))
+        .setDescription('Ver quantidade de perguntas em cada situação e previsões.'))
   .addSubcommand(subcommand =>
     subcommand
       .setName('autores')
-      .setDescription('Ver ranking de autores com mais perguntas.'));
+      .setDescription('Ver ranking de autores com mais perguntas.')
+      .addIntegerOption(option =>
+        option.setName('situação')
+          .setDescription('Veja o ranking filtrando pela situação das perguntas.')
+          .setRequired(false)
+          .addChoices(
+            { name: 'Aprovadas', value: 2 },
+            { name: 'Enviadas', value: 3 },
+            { name: 'Recusadas', value: 1 },
+            { name: 'Em análise', value: 0 }
+          ))
+  );
 
-async function execute(interaction) {
+  async function execute(interaction) {
   const chosenType = interaction.options._subcommand;
-
-  const questions = database.from('questions');
 
   if (chosenType == 'perguntas') {
     await interaction.deferReply();
 
-    const questionsData = (await questions.select('status')).data; // , { count: 'exact' }
+    const { data: questionsData } = await database.from('questions').select('status'); // , { count: 'exact' }
   
     const approvedQuestionsLength = questionsData.filter(question => question.status == 2).length;
     const sentQuestionsLength = questionsData.filter(question => question.status == 3).length;
@@ -33,12 +40,13 @@ async function execute(interaction) {
 
     interaction.editReply(`✅ • **${approvedQuestionsLength}** perguntas estão **aprovadas** e na fila de envio. — ${approvedQuestionsLength > 0 ? `Tem pergunta até <t:${daysPrediction}:D>.` : '💀 Tamo sem pergunta.'}
 ☑️ • **${sentQuestionsLength}** perguntas já foram **enviadas**.
-❌ • **${declinedQuestionsLength}** perguntas foram **negadas**.
-⌛ • **${inReviewQuestionsLength}** perguntas estão **em revisão**.`);
+❌ • **${declinedQuestionsLength}** perguntas foram **recusadas**.
+⌛ • **${inReviewQuestionsLength}** perguntas estão **em análise**.`);
   } else if (chosenType == 'autores') {
     await interaction.deferReply();
 
-    const questionsData = (await questions.select('author')).data;
+    const status = interaction.options.getInteger('situação');
+    const { data: questionsData } = await database.from('questions').select('author,status').match(status !== null ? {status} : {});
     
     const counts = questionsData.reduce((acc, item) => {
       const author = item.author;
@@ -49,8 +57,14 @@ async function execute(interaction) {
     const ranking = Object.entries(counts).sort((a, b) => b[1] - a[1]);
     const rankingAsString = (await Promise.all(ranking.map(async ([author, count], index) => `${index < 3 ? '**' : ``}${index + 1}º - ${(await bot.users.fetch(author)).username} (${count} pergunta${count == 1 ? '' : 's'})${index < 3 ? '**' : ''}`))).join('\n');
     
-    interaction.editReply(rankingAsString);
+    if (!rankingAsString) {
+      interaction.editReply('Sem perguntas nessa situação.');
+      return;
+    }
+    
+    const statusTitle = ['⌛ • Em análise', '❌ • Recusadas', '✅ • Aprovadas', '☑️ • Enviadas'];
+    interaction.editReply(`${status ? `**${statusTitle[status]}**\n\n` : ''}${rankingAsString}`);
   }
 }
 
-module.exports = { properties, execute };
+module.exports = { properties, execute, id: 'stats' };

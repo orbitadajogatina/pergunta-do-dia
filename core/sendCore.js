@@ -1,16 +1,21 @@
 const moment = require('moment-timezone');
-const bot = global.bot;
-const database = global.database;
 const transformQuestionsDataToEmbed = require('../core/transformQuestionsDataToEmbed');
+const { checkAndParseQuestion } = require('../core/questionManager');
+const axios = require('axios');
 const Jimp = require('jimp');
-const logError = require('../core/logError');
 
 async function chooseQuestion () {
   const questionsData = (await database.from('questions').select().eq('status', 2).is('sentAt', null)).data;
   const luckNumber = Math.floor(Math.random() * questionsData.length);
-  const chosenQuestion = questionsData[0] ? questionsData[luckNumber] : 'fabricar pergunta'; // await generateQuestion()
+  const chosenQuestion = questionsData[0] ? questionsData[luckNumber] : await generateQuestion();
 
   return chosenQuestion;
+}
+
+async function generateQuestion() {
+  // question, options, description, footer, image, author, status
+  //console.log(checkAndParseQuestion(`Você já ?`, `👍 - Sim, eu já .\n👎 - Não, eu nunca .`, description, footer, image, author, status));
+  console.log('fabricar pergunta');
 }
 
 async function makeEmojisAndTransformText(question) {
@@ -37,7 +42,9 @@ async function makeEmojisAndTransformText(question) {
 
     try {
       if (emojisToDelete[0]) await (emojisToDelete.shift()).delete();
-    } catch (err) {logError(err, 'Deletar emoji')}
+    } catch (err) {
+      console.error(err, 'Deletar emoji')
+    }
   }
 
   return optionsWithEmojisIDs;
@@ -65,10 +72,8 @@ async function sendQuestion (question) {
     });
     thread.send(`de: <@${question.author}>`);
 
-    if (question.id != 'factory') {
-      const sentAt = moment.tz(moment(), 'America/Sao_Paulo').format();
-      await database.from('questions').update({sentAt: sentAt, status: 3}).eq('id', question.id);
-    }
+    const sentAt = moment.tz(moment(), 'America/Sao_Paulo').format();
+    await database.from('questions').update({sentAt: sentAt, status: 3, messageID: message.id}).eq('id', question.id);
   } catch (err) {
     message?.delete();
     throw `pergunta ${question.id}, ${err}`;
@@ -88,7 +93,7 @@ function runCron () {
         main();
       }
     }).catch(err => {
-      logError(err, 'cron');
+      console.error(err, 'cron');
     });
   }, null, true, 'America/Sao_Paulo');
 }

@@ -8,4 +8,4 @@ async function execute(interaction) {
   await interaction.reply('Pong!');
 }
 
-module.exports = { properties, execute };
+module.exports = { properties, execute, id: 'ping' };

@@ -1,10 +1,9 @@
-// Pergunta do Dia Bot v0.4.2 - criado pelo Enzo da Órbita da Jogatina
+// Pergunta do Dia Bot v0.5.0 - criado pelo Enzo da Órbita da Jogatina
 // Código adaptado do discord.js Guide (https://discordjs.guide)
 
 'use strict';
 
 const fs = require('fs');
-const logError = require('./core/logError');
 const botWeb = require('express')();
 const { Client, GatewayIntentBits, Partials } = require('discord.js');
 const dotenv = require('dotenv');
@@ -34,8 +33,8 @@ global.database = database;
 require('./core/commandsCore').deployCommands();
 require('./core/eventsCore').deployEvents();
 
-process.on('unhandledRejection', (reason, promise) => logError(reason, promise));
-process.on('uncaughtException', (reason, origin) => logError(reason, origin));
+process.on('unhandledRejection', (reason, promise) => console.error(reason, promise));
+process.on('uncaughtException', (reason, origin) => console.error(reason, origin));
 
 botWeb.get('/', (req, res) => { 
   res.send('❔📆🥰 - Pergunta do Dia no ar!');

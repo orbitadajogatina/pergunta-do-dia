@@ -10,12 +10,13 @@ module.exports = function transformQuestionsDataToEmbed (data, includeStatusAndD
     .setColor('Random')
     .setTitle(data.question)
     .setDescription(`${data.description ? data.description : ''}\n\n${parseOptionsReverse(data.options)}\n\n${data.footer ? `_${data.footer}_` : ''}`)
-    .setImage(data.image);
-
+    .setImage(data.image || null);
+    
+  // if (data.image) questionEmbed.setImage(data.image);
   if (includeStatusAndDates) questionEmbed.addFields(
     {
       name: 'Situação', 
-      value: ['Em análise', 'Negada', 'Aceita', 'Enviada'][data.status], 
+      value: ['Em análise', 'Recusada', 'Aprovada', 'Enviada'][data.status], 
       inline: true
     },
     {

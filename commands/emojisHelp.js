@@ -21,4 +21,4 @@ Use \`##\` ao invés do emoji, assim: \`## - Lápis\`.
 Adicione usando \`:nomedoemoji:\`, através do seu teclado ou \`Windows + .\`. Para emojis do servidor, é necessário informar o ID, [saiba mais](https://support.discord.com/hc/en-us/community/posts/360069335891/comments/1500000646661).`);
 }
 
-module.exports = { properties, execute };
+module.exports = { properties, execute, id: 'emojisHelp' };

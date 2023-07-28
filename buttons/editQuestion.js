@@ -1,27 +1,26 @@
 const { ModalBuilder } = require('discord.js');
 const { questionBuilder } = require('../commands/newQuestion.js');
 
-async function editField (interaction) {
-  const infoOnID = interaction.customId.split('_');
-  const fieldToEdit = infoOnID[2];
-  const questionID = infoOnID[3];
+async function editQuestion(interaction) {
+  const userID = interaction.user.id;
+  if (userID !== interaction.message.interaction?.user.id) return;
 
-  const questions = database.from('questions');
-  const question = (await questions.select().eq('id', questionID)).data[0];
-  const oldValue = fieldToEdit === 'options' ? question[fieldToEdit].map(({emoji, text}) => `${emoji.replace(/\[Imagem\]\((.*?)\)/, '$1')} - ${text}`).join('\n') : question[fieldToEdit];
+  const dataOnID = interaction.customId.split('_');
+  const questionID = dataOnID[2];
+  const question = (await database.from('questions').select().eq('id', questionID)).data[0];
 
-  await interaction.showModal(questionEditBuilder(fieldToEdit, interaction.customId, oldValue));
-}
+  questionBuilder.components.forEach((component) => {
+    const currentField = component.components[0].data.custom_id;
+    component.components[0].data.value = currentField === 'options' ? question[currentField].map(({emoji, text}) => `${emoji.replace(/\[Imagem\]\((.*?)\)/, '$1')} - ${text}`).join('\n') : question[currentField];
+  });
+  const components = questionBuilder.components;
 
-function questionEditBuilder(fieldToEdit, id, oldValue) {
-  const questionForm = questionBuilder();
-  let component = questionForm.components.find(component => component.components[0].data.custom_id === fieldToEdit);
-  if (oldValue) component.components[0].setValue(oldValue);
-
-  return new ModalBuilder()
-    .setCustomId(id)
+  const questionEditModal = new ModalBuilder()
+    .setCustomId(interaction.customId)
     .setTitle('Editar pergunta')
-    .addComponents(component);
+    .addComponents(components);
+
+  interaction.showModal(questionEditModal);
 }
 
-module.exports = {editField, questionEditBuilder}
+module.exports = {editQuestion}

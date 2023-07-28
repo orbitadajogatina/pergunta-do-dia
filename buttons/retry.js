@@ -1,23 +1,43 @@
+const { ModalBuilder } = require('discord.js');
 const { questionBuilder } = require('../commands/newQuestion.js');
-const { questionEditBuilder } = require('../buttons/editQuestion.js');
 
-async function newQuestion (interaction) {
+async function execute (interaction) {
+  const userID = interaction.user.id;
   const messageContent = interaction.message.content;
-  const draftFields = messageContent.match(/`([^`]*)`/g).map(match => match.replace(/`/g, ''));
+  const mentionOnMessage = messageContent.match(/<@(\d{17,19})>/);
+  if (userID !== mentionOnMessage[1]) return;
 
-  let questionForm = questionBuilder();
-  questionForm.components.forEach((component, index) => component.components[0].data.value = draftFields[index] == '-' ? '' : draftFields[index]);
+  const draftFieldsAsEntries = messageContent.match(/(.*?): `([^`]*)`/g).map(field => {
+    const fieldParsed = field.match(/(.*?): `([^`]*)`/);
+    return [fieldParsed[1], fieldParsed[2] == '-' ? '' : fieldParsed[2]];
+  });
+  const draftFields = Object.fromEntries(draftFieldsAsEntries)
+  questionBuilder.components.forEach((component) => {
+    const currentField = component.components[0].data.custom_id;
+    component.components[0].data.value = draftFields[currentField];
+  });
 
-  await interaction.showModal(questionForm);
+  const modalID = interaction.customId.slice(6);
+  const titlesByID = {
+    newQuestion: 'Nova pergunta',
+    manageQuestion: 'Editar pergunta'
+  }
+  const components = questionBuilder.components;
+
+  const retryQuestionModal = new ModalBuilder()
+    .setCustomId(modalID)
+    .setTitle(titlesByID[modalID])
+    .addComponents(components);
+
+  interaction.showModal(retryQuestionModal);
 }
 
-async function editQuestion (interaction) {
-  const messageContent = interaction.message.content;
-  const infoOnID = interaction.customId.split('_');
-  const fieldToEdit = infoOnID[3];
-  const draftFields = messageContent.match(/`([^`]*)`/g).map(match => match.replace(/`/g, ''));
+function newQuestion (interaction) {
+  execute(interaction);
+}
 
-  await interaction.showModal(questionEditBuilder(fieldToEdit, interaction.customId.slice(6), draftFields[0]));
+function editQuestion (interaction) {
+  execute(interaction);
 }
 
 module.exports = {newQuestion, editQuestion}
