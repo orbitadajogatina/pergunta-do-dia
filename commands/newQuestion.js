@@ -18,6 +18,7 @@ const properties = new SlashCommandBuilder()
       ));
 
 async function execute(interaction) {
+  let questionBuilder = buildNewQuestionModal();
   const templateData = interaction.options.getString('modelo')?.split('-');
   
   if (templateData) {
@@ -35,7 +36,7 @@ async function execute(interaction) {
   await interaction.showModal(questionBuilder);
 }
 
-const questionBuilder = new ModalBuilder()
+const buildNewQuestionModal = () => new ModalBuilder()
   .setCustomId('newQuestion')
   .setTitle('Nova pergunta')
   .addComponents(
@@ -86,4 +87,4 @@ const questionBuilder = new ModalBuilder()
     )
   );
 
-module.exports = { properties, execute, questionBuilder, id: 'newQuestion' };
+module.exports = { properties, execute, buildNewQuestionModal, id: 'newQuestion' };

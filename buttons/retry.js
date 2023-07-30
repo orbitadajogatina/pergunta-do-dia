@@ -1,7 +1,9 @@
 const { ModalBuilder } = require('discord.js');
-const { questionBuilder } = require('../commands/newQuestion.js');
+const { buildNewQuestionModal } = require('../commands/newQuestion.js');
 
 async function execute (interaction) {
+  let questionBuilder = buildNewQuestionModal();
+
   const userID = interaction.user.id;
   const messageContent = interaction.message.content;
   const mentionOnMessage = messageContent.match(/<@(\d{17,19})>/);

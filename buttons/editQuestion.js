@@ -1,9 +1,10 @@
 const { ModalBuilder } = require('discord.js');
-const { questionBuilder } = require('../commands/newQuestion.js');
+const { buildNewQuestionModal } = require('../commands/newQuestion.js');
 
 async function editQuestion(interaction) {
   const userID = interaction.user.id;
   if (userID !== interaction.message.interaction?.user.id) return;
+  let questionBuilder = buildNewQuestionModal();
 
   const dataOnID = interaction.customId.split('_');
   const questionID = dataOnID[2];
