@@ -4,10 +4,18 @@ const { checkAndParseQuestion } = require('../core/questionManager');
 const axios = require('axios');
 const Jimp = require('jimp');
 
+let lastQuestionsAuthors = [];
+
 async function chooseQuestion () {
   const questionsData = (await database.from('questions').select().eq('status', 2).is('sentAt', null)).data;
+  const filteredQuestions = questionsData.filter(e => !lastQuestionsAuthors.includes(e.author));
+  if (filteredQuestions.length == 0) {
+    lastQuestionsAuthors = [];
+    lastQuestionsAuthors = questionsData;
+  }
   const luckNumber = Math.floor(Math.random() * questionsData.length);
   const chosenQuestion = questionsData[0] ? questionsData[luckNumber] : await generateQuestion();
+  lastQuestionsAuthors.push(chosenQuestion.author);
 
   return chosenQuestion;
 }
