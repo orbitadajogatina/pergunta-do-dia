@@ -4,20 +4,21 @@ const { checkAndParseQuestion } = require('../core/questionManager');
 const axios = require('axios');
 const Jimp = require('jimp');
 
-let lastQuestionsAuthors = [];
-
 async function chooseQuestion () {
-  const questionsData = (await database.from('questions').select().eq('status', 2).is('sentAt', null)).data;
-  const filteredQuestions = questionsData.filter(e => !lastQuestionsAuthors.includes(e.author));
+  let lastQuestionsAuthors = JSON.parse((await database.from('variables').select().eq('key', 'lastQuestionsAuthors')).data[0]?.value || '[]');
+
+  const { data: questionsData } = await database.from('questions').select().eq('status', 2).is('sentAt', null);
+  let filteredQuestions = questionsData.filter(question => !lastQuestionsAuthors.includes(question.author));
   if (filteredQuestions.length == 0) {
     lastQuestionsAuthors = [];
-    lastQuestionsAuthors = questionsData;
+    filteredQuestions = questionsData;
   }
-  console.log("filteredQuestions", filteredQuestions);
-  console.log("lastQuestionsAuthors", lastQuestionsAuthors);
-  const luckNumber = Math.floor(Math.random() * questionsData.length);
-  const chosenQuestion = questionsData[0] ? questionsData[luckNumber] : await generateQuestion();
+  
+  const luckNumber = Math.floor(Math.random() * filteredQuestions.length);
+  const chosenQuestion = filteredQuestions[0] ? filteredQuestions[luckNumber] : await generateQuestion();
+  
   lastQuestionsAuthors.push(chosenQuestion.author);
+  await database.from('variables').upsert({ key: 'lastQuestionsAuthors', value: JSON.stringify(lastQuestionsAuthors) });
 
   return chosenQuestion;
 }
