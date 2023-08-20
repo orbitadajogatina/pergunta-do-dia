@@ -13,6 +13,8 @@ async function chooseQuestion () {
     lastQuestionsAuthors = [];
     lastQuestionsAuthors = questionsData;
   }
+  console.log("filteredQuestions", filteredQuestions);
+  console.log("lastQuestionsAuthors", lastQuestionsAuthors);
   const luckNumber = Math.floor(Math.random() * questionsData.length);
   const chosenQuestion = questionsData[0] ? questionsData[luckNumber] : await generateQuestion();
   lastQuestionsAuthors.push(chosenQuestion.author);
