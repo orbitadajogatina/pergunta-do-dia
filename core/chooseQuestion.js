@@ -2,10 +2,10 @@ const transformQuestionsDataToDropdown = require('../core/transformQuestionsData
 const transformQuestionsDataToEmbed = require('../core/transformQuestionsDataToEmbed');
 const moment = require('moment-timezone');
 
-function makeMessageWithDropdownsAndButtons (questionsData = [], dropdownID, messageOnNoQuestions) {
+function makeMessageWithDropdownsAndButtons (questionsData = [], dropdownID, messageOnNoQuestions, options) {
   if (questionsData.length > 0) {
     const dropdownWithButtons = transformQuestionsDataToDropdown(questionsData, 0, dropdownID);
-    return { components: dropdownWithButtons, embeds: [], content: '' };
+    return { components: dropdownWithButtons, embeds: [], content: options?.length > 0 ? '**Filtros**\n' + options.map(option => `${option.name}: ${option.value.toString().replace(/\@/g, '')}`).join('\n') : '' };
   } else {
     return { content: messageOnNoQuestions, components: [], embeds: [] };
   }
@@ -30,29 +30,139 @@ async function selectQuestion (questionID, questionsData, dropdownID, otherCompo
   const embed = transformQuestionsDataToEmbed(selectedQuestionData[0], true);
   const dropdown = transformQuestionsDataToDropdown(questionsData, page, dropdownID);
 
-  return { content: '', embeds: [embed], components: [...otherComponents, ...dropdown] };
+  return { embeds: [embed], components: [...otherComponents, ...dropdown] };
+}
+
+function getFilters(interaction, options) {
+  const filtersAsString = interaction.message?.content.split("\n").filter(line => !line.startsWith("*"));
+  const filtersStringAsObject = filtersAsString?.map(filter => {
+    const [key, value] = filter.split(":").map(part => part.trim());
+    return { name: key, value: value };
+  });
+  
+  return  options || filtersStringAsObject || [];
 }
 
 const questionsDataByCommand = {
-  manageQuestion: async (interaction) => {
+  manageQuestion: async (interaction, options = interaction.options?.data) => {
+    let data = [];
     const userID = interaction.user.id;
     const twentyFourHoursAgo = moment.tz(moment().subtract(24, 'hours'), 'America/Sao_Paulo');
-    const { data, error } = await database.from('questions').select('question, id, status, options, createdAt').eq('author', userID).or(`sentAt.is.null,sentAt.gte.${twentyFourHoursAgo.format()}}`).order('createdAt', { ascending: false });
+
+    const filters = getFilters(interaction, options);
+    const questionFilterQuery = filters.find(filter => filter.name === 'pergunta');
+    const statusFilter = filters.find(filter => filter.name === 'situação');
+    
+    if (questionFilterQuery?.value) {
+      const { data: dataWithFilters } = await database
+        .from('questions')
+        .select('question, id, status, options, createdAt')
+        .eq('author', userID)
+        .or(`sentAt.is.null,sentAt.gte.${twentyFourHoursAgo.format()}}`)
+        .order('createdAt', { ascending: false })
+        .textSearch('search_columns', questionFilterQuery?.value, {config: 'english', type: 'websearch'})
+        .filter('status', statusFilter?.value.toString() ? 'eq' : 'neq', statusFilter?.value.toString() || -1);
+        
+      data = dataWithFilters;
+    } else {
+      const { data: dataWithoutFilters } = await database
+        .from('questions')
+        .select('question, id, status, options, createdAt')
+        .eq('author', userID)
+        .or(`sentAt.is.null,sentAt.gte.${twentyFourHoursAgo.format()}}`)
+        .order('createdAt', { ascending: false })
+        .filter('status', statusFilter?.value.toString() ? 'eq' : 'neq', statusFilter?.value.toString() || -1);
+
+      data = dataWithoutFilters;
+    }
     
     return data?.sort((a, b) => a.status - b.status);
   },
-  viewQuestion: async (interaction) => {
+  viewQuestion: async (interaction, options = interaction.options?.data) => {
+    let data = [];
     const userID = interaction.user.id;
-    const { data } = await database.from('questions').select('question, id, status, options, createdAt').eq('author', userID).order('createdAt', { ascending: false });
+
+    const filters = getFilters(interaction, options);
+    const questionFilterQuery = filters.find(filter => filter.name === 'pergunta');
+    const statusFilter = filters.find(filter => filter.name === 'situação');
+    
+    if (questionFilterQuery?.value) {
+      const { data: dataWithFilters } = await database
+        .from('questions')
+        .select()
+        .textSearch('search_columns', questionFilterQuery?.value, {config: 'english', type: 'websearch'})
+        .eq('author', userID).order('createdAt', { ascending: false })
+        .filter('status', statusFilter?.value.toString() ? 'eq' : 'neq', statusFilter?.value.toString() || -1);
+        
+      data = dataWithFilters;
+    } else {
+      const { data: dataWithoutFilters } = await database
+        .from('questions')
+        .select('question, id, status, options, createdAt')
+        .eq('author', userID).order('createdAt', { ascending: false })
+        .filter('status', statusFilter?.value.toString() ? 'eq' : 'neq', statusFilter?.value.toString() || -1);
+
+      data = dataWithoutFilters;
+    }
+
     return data?.sort((a, b) => a.status - b.status);
   },
-  sendQuestion: async (interaction) => {
-    const { data } = await database.from('questions').select('question, id, status, options, createdAt').eq('status', 2).is('sentAt', null).order('createdAt', { ascending: false });
+  sendQuestion: async (interaction, options = interaction.options?.data) => {
+    let data = [];
+
+    const filters = getFilters(interaction, options);
+    const questionFilterQuery = filters.find(filter => filter.name === 'pergunta');
+    
+    if (questionFilterQuery?.value) {
+      const { data: dataWithFilters } = await database
+        .from('questions')
+        .select('question, id, status, options, createdAt')
+        .eq('status', 2)
+        .is('sentAt', null)
+        .order('createdAt', { ascending: false })
+        .textSearch('search_columns', questionFilterQuery?.value, {config: 'english', type: 'websearch'});
+        
+      data = dataWithFilters;
+    } else {
+      const { data: dataWithoutFilters } = await database
+        .from('questions')
+        .select('question, id, status, options, createdAt')
+        .eq('status', 2)
+        .is('sentAt', null)
+        .order('createdAt', { ascending: false });
+
+      data = dataWithoutFilters;
+    }
 
     return data;
   },
-  changeStatusOfQuestion: async (interaction) => {
-    const { data } = await database.from('questions').select('question, id, status, options, createdAt').is('sentAt', null).order('createdAt', { ascending: false });
+  changeStatusOfQuestion: async (interaction, options = interaction.options?.data) => {
+    let data = [];
+
+    const filters = getFilters(interaction, options);
+    const questionFilterQuery = filters.find(filter => filter.name === 'pergunta');
+    const statusFilter = filters.find(filter => filter.name === 'situação');
+    
+    if (questionFilterQuery?.value) {
+      const { data: dataWithFilters } = await database
+        .from('questions')
+        .select('question, id, status, options, createdAt')
+        .is('sentAt', null)
+        .order('createdAt', { ascending: false })
+        .textSearch('search_columns', questionFilterQuery?.value, {config: 'english', type: 'websearch'})
+        .filter('status', statusFilter?.value.toString() ? 'eq' : 'neq', statusFilter?.value.toString() || -1);
+        
+      data = dataWithFilters;
+    } else {
+      const { data: dataWithoutFilters } = await database
+        .from('questions')
+        .select('question, id, status, options, createdAt')
+        .is('sentAt', null)
+        .order('createdAt', { ascending: false })
+        .filter('status', statusFilter?.value.toString() ? 'eq' : 'neq', statusFilter?.value.toString() || -1);
+
+      data = dataWithoutFilters;
+    }
 
     return data;
   }

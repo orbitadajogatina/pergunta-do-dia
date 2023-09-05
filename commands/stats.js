@@ -14,7 +14,7 @@ const properties = new SlashCommandBuilder()
       .setDescription('Ver ranking de autores com mais perguntas.')
       .addIntegerOption(option =>
         option.setName('situação')
-          .setDescription('Veja o ranking filtrando pela situação das perguntas.')
+          .setDescription('Filtre o ranking pela situação das perguntas.')
           .setRequired(false)
           .addChoices(
             { name: 'Aprovadas', value: 2 },

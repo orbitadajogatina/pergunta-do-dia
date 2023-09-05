@@ -44,7 +44,7 @@ module.exports = {
                 .setLabel('Tentar novamente')
                 .setStyle(ButtonStyle.Secondary)
             );
-          const userDraft = interaction.fields.fields.map(field => `${field.customId}: \`${field.value ? field.value : '-'}\``).join('\n');
+          const userDraft = interaction.fields.fields.map(field => `${field.customId}: \`${field.value ? field.value.replace(/`/g, '') : '-'}\``).join('\n');
 
           return {
             content: `**Eita, <@${interaction.user.id}>.** Há um errinho neste comando. Chama o Enzo pra resolver essa parada!\n\nSeu rascunho:\n${userDraft}\n\n\`\`\`\n${error}\`\`\``,
@@ -60,7 +60,7 @@ module.exports = {
                 .setLabel('Tentar novamente')
                 .setStyle(ButtonStyle.Secondary)
             );
-          const userDraft = interaction.fields.fields.map(field => `${field.customId}: \`${field.value ? field.value : '-'}\``).join('\n');
+          const userDraft = interaction.fields.fields.map(field => `${field.customId}: \`${field.value ? field.value.replace(/`/g, '') : '-'}\``).join('\n');
 
           return {
             content: `${error.content}\n\nRascunho de <@${interaction.user.id}>:\n${userDraft}`,

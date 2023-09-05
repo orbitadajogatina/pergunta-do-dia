@@ -70,7 +70,7 @@ async function changeStatusOfQuestion(interaction) {
         .setLabel('Aprovar')
         .setStyle(ButtonStyle.Success),
       new ButtonBuilder()
-        .setCustomId(`setQuestionStatus_decline_${questionID}`)
+        .setCustomId(`setQuestionStatus_askReason_${questionID}`)
         .setLabel('Recusar')
         .setStyle(ButtonStyle.Danger)
     );

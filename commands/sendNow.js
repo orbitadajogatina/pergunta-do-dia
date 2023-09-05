@@ -13,7 +13,11 @@ const properties = new SlashCommandBuilder()
   .addSubcommand(subcommand =>
     subcommand
       .setName('específico')
-      .setDescription('Escolher uma pergunta.'))
+      .setDescription('Escolher uma pergunta.')
+      .addStringOption(option =>
+        option.setName('pergunta')
+          .setDescription('Pesquise por texto em perguntas, descrições e rodapés.')
+          .setRequired(false)))
   .setDMPermission(false);
 
 async function execute (interaction) {
@@ -30,8 +34,10 @@ async function execute (interaction) {
     sendCore.main();
   } else if (chosenType == 'específico') {
     await interaction.deferReply();
-    const questionsData = await questionsDataByCommand.sendQuestion(interaction);
-    const messageWithDropdownsAndButtons = makeMessageWithDropdownsAndButtons(questionsData, 'chooseQuestion_sendQuestion', '💀 Tamo sem pergunta.')
+    const options = interaction.options.data[0].options;
+    const questionsData = await questionsDataByCommand.sendQuestion(interaction, options);
+
+    const messageWithDropdownsAndButtons = makeMessageWithDropdownsAndButtons(questionsData, 'chooseQuestion_sendQuestion', '💀 Tamo sem pergunta.', options)
     interaction.editReply(messageWithDropdownsAndButtons);
   }
 }

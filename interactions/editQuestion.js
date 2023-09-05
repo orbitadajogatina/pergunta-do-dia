@@ -4,11 +4,11 @@ const { checkAndParseQuestion, reviewQuestion, editQuestionAndMessageAlreadySent
 const { execute } = require('../interactions/chooseQuestion.js');
 const transformQuestionsDataToEmbed = require('../core/transformQuestionsDataToEmbed');
 
-function editQuestion (interaction) {
+async function editQuestion (interaction) {
   if (wasSentInTheLast24Hours(interaction.message.embeds[0])) {
-    editQuestionAlreadySent(interaction);
+    await editQuestionAlreadySent(interaction);
   } else {
-    editQuestionNotSent(interaction);
+    await editQuestionNotSent(interaction);
   }
 }
 
@@ -41,10 +41,10 @@ async function editQuestionAlreadySent (interaction) {
   if (editedQuestion.options.find(({emoji, text}) => emoji.startsWith('$'))) deleteMessage = true;
   if (userIsAdmin) {
     if (deleteMessage) {
-      editQuestionAndSendAgain(editedQuestion, questionID, currentQuestion[0].messageID, interaction);
+      await editQuestionAndSendAgain(editedQuestion, questionID, currentQuestion[0].messageID, interaction);
     } else {
       const embed = transformQuestionsDataToEmbed(editedQuestion, false);
-      editQuestionAndMessageAlreadySent(embed, editedQuestion, questionID, currentQuestion[0].messageID, interaction);
+      await editQuestionAndMessageAlreadySent(embed, editedQuestion, questionID, currentQuestion[0].messageID, interaction);
     }
   } else {
     await reviewQuestion(editedQuestion, interaction, userIsAdmin, 'editQuestion');
@@ -86,10 +86,10 @@ async function editQuestionNotSent (interaction) {
         .setStyle(ButtonStyle.Danger)
     );
 
-    await reviewQuestion(data[0], interaction, userIsAdmin, 'editQuestion');
-    interaction.customId = `chooseQuestion_manageQuestion_${questionID}`;
-    const message = await execute(interaction, questionID, [manageButtons]);
-    interaction.message.edit(message);
+  await reviewQuestion(data[0], interaction, userIsAdmin, 'editQuestion');
+  interaction.customId = `chooseQuestion_manageQuestion_${questionID}`;
+  const message = await execute(interaction, questionID, [manageButtons]);
+  interaction.message.edit(message);
 }
 
 module.exports = {editQuestion}

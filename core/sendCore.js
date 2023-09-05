@@ -2,20 +2,120 @@ const moment = require('moment-timezone');
 const transformQuestionsDataToEmbed = require('../core/transformQuestionsDataToEmbed');
 const { checkAndParseQuestion } = require('../core/questionManager');
 const axios = require('axios');
+const FormData = require('form-data');
+const { JSDOM } = require('jsdom');
 const Jimp = require('jimp');
 
 async function chooseQuestion () {
-  const questionsData = (await database.from('questions').select().eq('status', 2).is('sentAt', null)).data;
-  const luckNumber = Math.floor(Math.random() * questionsData.length);
-  const chosenQuestion = questionsData[0] ? questionsData[luckNumber] : await generateQuestion();
+  let lastQuestionsAuthors = JSON.parse((await database.from('variables').select().eq('key', 'lastQuestionsAuthors')).data[0]?.value || '[]');
+
+  const { data: questionsData } = await database.from('questions').select().eq('status', 2).is('sentAt', null);
+  let filteredQuestions = questionsData.filter(question => !lastQuestionsAuthors.includes(question.author));
+  if (filteredQuestions.length == 0) {
+    lastQuestionsAuthors = [];
+    filteredQuestions = questionsData;
+  }
+  
+  const luckNumber = Math.floor(Math.random() * filteredQuestions.length);
+  const chosenQuestion = filteredQuestions[0] ? filteredQuestions[luckNumber] : await checkIfQuestionAlreadyExist(await generateQuestion());
+  
+  lastQuestionsAuthors.push(chosenQuestion.author);
+  await database.from('variables').upsert({ key: 'lastQuestionsAuthors', value: JSON.stringify(lastQuestionsAuthors) });
 
   return chosenQuestion;
 }
 
+async function checkIfQuestionAlreadyExist(question) {
+  let approvedQuestion = false;
+  do {
+    const { data } = await database.from('questions').select('question').eq('question', question.question);
+    if (data.length > 0) {
+      // console.log('recusado', question.question)
+      question = await generateQuestion();
+    } else {
+      approvedQuestion = true;
+    }
+  } while (approvedQuestion == false);
+  
+  const { error, data: newQuestion } = await database.from('questions').insert(question).select();
+  if (error) throw error;
+  // console.log('aprovado', newQuestion[0].question)
+  return newQuestion[0];
+}
+
 async function generateQuestion() {
-  // question, options, description, footer, image, author, status
-  //console.log(checkAndParseQuestion(`Você já ?`, `👍 - Sim, eu já .\n👎 - Não, eu nunca .`, description, footer, image, author, status));
-  console.log('fabricar pergunta');
+  const contentTypesData = [
+    {
+      name: 'games',
+      portugueseVerbForQuestion: 'jogou',
+      portugueseVerbForOption: 'joguei',
+      url: 'https://randommer.io/random-games',
+      body: {
+        quantity: ['1'],
+        platforms: [
+          '137', '37', '20', '159', '130', '8', '9', '48', '167', '5', '41', '12', '36', '49', '169'
+        ]
+      }
+    },
+    {
+      name: 'movies',
+      portugueseVerbForQuestion: 'assistiu',
+      portugueseVerbForOption: 'assisti',
+      url: 'https://randommer.io/random-movies',
+      body: {
+        quantity: ['1'],
+        language: ['en'],
+        year: ['2010']
+      }
+    },
+    {
+      name: 'cartoons',
+      portugueseVerbForQuestion: 'assistiu',
+      portugueseVerbForOption: 'assisti',
+      url: 'https://randommer.io/random-shows',
+      body: {
+        quantity: ['1'],
+        genres: ['16']
+      }
+    }
+  ];
+  const luckNumber = Math.floor(Math.random() * contentTypesData.length);
+  const chosenContentType = contentTypesData[luckNumber];
+
+  let requestBody = new FormData();
+  for (let i = 0; i < Object.keys(chosenContentType.body).length; i++) {
+    const currentBodyKey = Object.keys(chosenContentType.body)[i];
+    const currentBodyValues = chosenContentType.body[currentBodyKey]
+    
+    for (let j = 0; j < currentBodyValues.length; j++) {
+      requestBody.append(currentBodyKey, currentBodyValues[j]);
+    }
+  }
+
+  const requestConfig = {
+    method: 'post',
+    maxBodyLength: Infinity,
+    url: chosenContentType.url,
+    headers: { 
+      'X-API-KEY': 'ddaefc4e08f54f8aa555e2e73ab3d075',
+      ...requestBody.getHeaders()
+    },
+    data: requestBody
+  };
+
+  try {
+    const response = await axios.request(requestConfig);
+    const { document } = (new JSDOM(response.data)).window;
+    
+    const contentTitle = document.querySelector('div.caption > p').textContent;
+    const contentCover = 'https://randommer.io' + document.querySelector('picture > source').getAttribute("srcset").replace('webp', 'jpg');
+
+    // question, options, description, footer, image, author, status
+    const question = await checkAndParseQuestion(`Você já ${chosenContentType.portugueseVerbForQuestion} ${contentTitle}?`, `👍 - Sim, eu já ${chosenContentType.portugueseVerbForOption}.\n👎 - Não, eu nunca ${chosenContentType.portugueseVerbForOption}.`, '', '', contentCover, '1050787722077409331', 2);
+    return question;
+  } catch (error) {
+    throw `error ao gerar pergunta, ${error}`;
+  }
 }
 
 async function makeEmojisAndTransformText(question) {
@@ -98,4 +198,4 @@ function runCron () {
   }, null, true, 'America/Sao_Paulo');
 }
 
-module.exports = { main, sendQuestion, runCron };
+module.exports = { main, runCron, sendQuestion, checkIfQuestionAlreadyExist, generateQuestion };

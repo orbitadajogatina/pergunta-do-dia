@@ -5,7 +5,7 @@ function parseOptionsReverse (arrayOptions) {
 	return arrayOptions.map(option => `${option.emoji} - ${option.text}`).join('\n');
 }
 
-module.exports = function transformQuestionsDataToEmbed (data, includeStatusAndDates) {
+module.exports = function transformQuestionsDataToEmbed (data, includeStatusAndDates, similarityScore) {
   let questionEmbed = new EmbedBuilder()
     .setColor('Random')
     .setTitle(data.question)
@@ -30,6 +30,7 @@ module.exports = function transformQuestionsDataToEmbed (data, includeStatusAndD
       inline: true
     }
   );
+  if (similarityScore) questionEmbed.setAuthor({name: `Esta pergunta é ${(similarityScore * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% similar com a enviada.`});
 
   return questionEmbed;
 }

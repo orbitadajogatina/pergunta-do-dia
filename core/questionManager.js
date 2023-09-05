@@ -21,6 +21,12 @@ async function checkAndParseQuestion (question, options, description, footer, im
   return questionObject;
 }
 
+async function searchForSimilarQuestions (query) {
+  const {data: similarQuestions} = await database.rpc('similarity_questions', {query});
+  const similarQuestionsAsEmbeds = similarQuestions?.map(question => transformQuestionsDataToEmbed(question, true, question.search_score));
+  return similarQuestionsAsEmbeds;
+}
+
 async function reviewQuestion (question, interaction, userIsAdmin, actionType) {
   const actions = {
     newQuestion: {
@@ -40,7 +46,10 @@ async function reviewQuestion (question, interaction, userIsAdmin, actionType) {
   await interaction.editReply(actions[actionType].notifications.user + nextStep);
 
   const embed = transformQuestionsDataToEmbed(question, true);
-  if (actionType === 'newQuestion') interaction.followUp({embeds: [embed], ephemeral: true})
+  let similarQuestions = await searchForSimilarQuestions(question.question);
+  if (actionType === 'newQuestion') {
+    interaction.followUp({embeds: userIsAdmin ? [embed, ...similarQuestions] : [embed], ephemeral: true})
+  };
 
   if (userIsAdmin) return;
 
@@ -51,12 +60,12 @@ async function reviewQuestion (question, interaction, userIsAdmin, actionType) {
         .setLabel('Aprovar')
         .setStyle(ButtonStyle.Success),
       new ButtonBuilder()
-        .setCustomId(`setQuestionStatus_decline_${question.id}`)
+        .setCustomId(`setQuestionStatus_askReason_${question.id}`)
         .setLabel('Recusar')
         .setStyle(ButtonStyle.Danger)
     );
 
-  (await bot.channels.fetch(process.env.MANAGE_CHANNEL_ID)).send({content: actions[actionType].notifications.admin, embeds: [embed], components: [buttons]});
+  (await bot.channels.fetch(process.env.MANAGE_CHANNEL_ID)).send({content: actions[actionType].notifications.admin, embeds: [embed, ...similarQuestions], components: [buttons]});
 }
 
 function wasSentInTheLast24Hours (embed) {
