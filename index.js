@@ -1,4 +1,4 @@
-// Pergunta do Dia Bot v1.0.0 - criado pelo Enzo da Órbita da Jogatina
+// Pergunta do Dia Bot v1.0.1 - criado pelo Enzo da Órbita da Jogatina
 // Código adaptado do discord.js Guide (https://discordjs.guide)
 
 'use strict';
