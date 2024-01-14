@@ -21,8 +21,8 @@ async function checkAndParseQuestion (question, options, description, footer, im
   return questionObject;
 }
 
-async function searchForSimilarQuestions (query) {
-  const {data: similarQuestions} = await database.rpc('similarity_questions', {query});
+async function searchForSimilarQuestions (query, newQuestionID) {
+  const {data: similarQuestions} = await database.rpc('similarity_questions', {query, new_question_id: newQuestionID});
   const similarQuestionsAsEmbeds = similarQuestions?.map(question => transformQuestionsDataToEmbed(question, true, question.search_score));
   return similarQuestionsAsEmbeds;
 }
@@ -46,7 +46,7 @@ async function reviewQuestion (question, interaction, userIsAdmin, actionType) {
   await interaction.editReply(actions[actionType].notifications.user + nextStep);
 
   const embed = transformQuestionsDataToEmbed(question, true);
-  let similarQuestions = await searchForSimilarQuestions(question.question);
+  let similarQuestions = await searchForSimilarQuestions(question.question, question.id);
   if (actionType === 'newQuestion') {
     interaction.followUp({embeds: userIsAdmin ? [embed, ...similarQuestions] : [embed], ephemeral: true})
   };
