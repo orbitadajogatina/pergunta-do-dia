@@ -63,7 +63,7 @@ module.exports = {
           const userDraft = interaction.fields.fields.map(field => `${field.customId}: \`${field.value ? field.value.replace(/`/g, '') : '-'}\``).join('\n');
 
           return {
-            content: `${error.content}\n\nRascunho de <@${interaction.user.id}>:\n${userDraft}`,
+            content: `${error.content}\n\nRascunho de <@${interaction.user.id}>:\n${userDraft}`.slice(0, 2000),
             components: [retryButton],
             embeds: []
           }

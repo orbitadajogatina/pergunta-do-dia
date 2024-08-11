@@ -1,4 +1,4 @@
-const ddg = require('duck-duck-scrape');
+const gis = require('async-g-i-s');
 const Jimp = require('jimp');
 const axios = require('axios');
 const DiscordEmojis = require('discord-emojis-parser');
@@ -25,7 +25,7 @@ async function emojiFromURL(urls) {
       if (chosenUrls.length == 3) break;
     } catch (err) {
       if (urls.length == 1 && err.toString().includes('Could not find MIME')) {
-        throw {from: 'user', content: `**Se liga, hein.** Parece que você não colocou o URL de uma imagem válida para criar um emoji.\n${err}`};
+        throw {from: 'user', content: `**Se liga, hein.** Parece que você não colocou o URL de uma imagem válida para criar um emoji. (${currentUrl}))\n${err}`};
       } else if (urls.length == 1) {
         throw err;
       } else {
@@ -52,20 +52,19 @@ async function parseEmojis (emoji, text, index) {
   if (makeEmoji) { // url, termo, pesquisa => emoji
     try {
       const searchOptions = {
-        locale: 'pt-br',
-        type: ddg.ImageType.TRANSPARENT
+        "tbs": "ic:trans"
       };
       const makeEmojiInput = makeEmoji[1];
       let emojiURL;
 
       if (!makeEmojiInput) {
-        const ddgSearch = (await ddg.searchImages(text, searchOptions)).results;
-        emojiURL = ddgSearch.map(result => result.image).filter(url => url.endsWith('.png'));
+        const gisSearch = await gis(text, {query: searchOptions});
+        emojiURL = gisSearch.map(result => result.url).filter(url => url.endsWith('.png'));
       } else if (makeEmojiInput.startsWith('http') || makeEmojiInput.startsWith('https')) {
         emojiURL = [makeEmojiInput];
       } else if (makeEmojiInput) {
-        const ddgSearch = (await ddg.searchImages(makeEmojiInput, searchOptions)).results;
-        emojiURL = ddgSearch.map(result => result.image).filter(url => url.endsWith('.png'));
+        const gisSearch = await gis(makeEmojiInput, {query: searchOptions});
+        emojiURL = gisSearch.map(result => result.url).filter(url => url.endsWith('.png'));
       }
 
       return emojiFromURL(emojiURL);
@@ -124,16 +123,13 @@ async function parseImage (url, questionQuestion) {
   
   const searchImage = url.match(/^\$(.*?)\$/);
   if (searchImage) {
-    const searchOptions = {
-      locale: 'pt-br'
-    };
     const searchImageInput = searchImage[1];
 
     if (searchImageInput.startsWith('http') || searchImageInput.startsWith('https')) {
       url = searchImageInput;
     } else {
-      const ddgSearch = (await ddg.searchImages(searchImageInput || questionQuestion, searchOptions)).results;
-      const results = ddgSearch.map(result => result.image).slice(0, 5);
+      const gisSearch = await gis(searchImageInput || questionQuestion);
+      const results = gisSearch.map(result => result.url).slice(0, 5);
       url = results[Math.floor(Math.random() * results.length)];
     }
   } else {
