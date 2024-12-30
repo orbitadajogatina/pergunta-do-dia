@@ -173,7 +173,7 @@ async function sendQuestion (question) {
     thread.send(`de: <@${question.author}>`);
 
     const sentAt = moment.tz(moment(), 'America/Sao_Paulo').format();
-    await database.from('questions').update({sentAt: sentAt, status: 3, messageID: message.id}).eq('id', question.id);
+    return await database.from('questions').update({sentAt: sentAt, status: 3, messageID: message.id}).eq('id', question.id).select().single();
   } catch (err) {
     message?.delete();
     throw `pergunta ${question.id}, ${err}`;
@@ -187,7 +187,12 @@ async function main () {
 function runCron () {
   const CronJob = require('cron').CronJob;
   
-  new CronJob('0 12-20 * * *', () => {
+  new CronJob('0 12-20 * * *', async () => {
+    try {
+      global.admins = await global.getAdmins();
+    } catch (err) {
+      console.error(err, 'cron-get-admins')
+    }
     database.from('questions').select('sentAt').gte('sentAt', moment.tz(moment(), 'America/Sao_Paulo').format('YYYY-MM-DD')).then(res => {
       if (res.data.length == 0) {
         main();

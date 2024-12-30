@@ -47,7 +47,7 @@ module.exports = {
           const userDraft = interaction.fields.fields.map(field => `${field.customId}: \`${field.value ? field.value.replace(/`/g, '') : '-'}\``).join('\n');
 
           return {
-            content: `**Eita, <@${interaction.user.id}>.** Há um errinho neste comando. Chama o Enzo pra resolver essa parada!\n\nSeu rascunho:\n${userDraft}\n\n\`\`\`\n${error}\`\`\``,
+            content: `**Eita, <@${interaction.user.id}>.** Há um errinho neste comando. Chama o Enzo pra resolver essa parada! *Lembrando que você pode usar o bot na DM para não vazar suas perguntas.*\n\nSeu rascunho:\n${userDraft}\n\n\`\`\`\n${error}\`\`\``,
             components: [retryButton],
             embeds: []
           }

@@ -2,7 +2,6 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const moment = require('moment-timezone');
 const transformQuestionsDataToEmbed = require('./transformQuestionsDataToEmbed');
 const { parseOptions, parseImage } = require('./parseFields');
-const sendCore = require('../core/sendCore');
 
 async function checkAndParseQuestion (question, options, description, footer, image, author, status) {
   const arrayOptions = await parseOptions(options);
@@ -11,8 +10,8 @@ async function checkAndParseQuestion (question, options, description, footer, im
   const questionObject = {
     question,
     options: arrayOptions,
-    description: description.replace(/[\r\n]+/g, '\n'),
-    footer,
+    description: description?.replace(/[\r\n]+/g, '\n') || null,
+    footer: footer || null,
     image: imageURL,
     author,
     status // 0 => Aguardando; 1 => Recusado; 2 => Aprovado; 3 => Enviada.
@@ -21,8 +20,9 @@ async function checkAndParseQuestion (question, options, description, footer, im
   return questionObject;
 }
 
-async function searchForSimilarQuestions (query, newQuestionID) {
+async function searchForSimilarQuestions (query, newQuestionID, embeds = true) {
   const {data: similarQuestions} = await database.rpc('similarity_questions', {query, new_question_id: newQuestionID});
+  if (!embeds) return similarQuestions;
   const similarQuestionsAsEmbeds = similarQuestions?.map(question => transformQuestionsDataToEmbed(question, true, question.search_score));
   return similarQuestionsAsEmbeds;
 }
@@ -43,13 +43,11 @@ async function reviewQuestion (question, interaction, userIsAdmin, actionType) {
     } 
   }
   const nextStep = userIsAdmin ? 'será enviada sabe-se lá quando.' : 'será analisada. Fique de olho na DM para saber se ela foi aceita ou não. Você também pode usar `/minhas-perguntas` para rever suas perguntas.';
-  await interaction.editReply(actions[actionType].notifications.user + nextStep);
+  if (interaction) await interaction.editReply(actions[actionType].notifications.user + nextStep);
 
   const embed = transformQuestionsDataToEmbed(question, true);
   let similarQuestions = await searchForSimilarQuestions(question.question, question.id);
-  if (actionType === 'newQuestion') {
-    interaction.followUp({embeds: userIsAdmin ? [embed, ...similarQuestions] : [embed], ephemeral: true})
-  };
+  if (actionType === 'newQuestion' && interaction) interaction.followUp({embeds: userIsAdmin ? [embed, ...similarQuestions] : [embed], ephemeral: true});
 
   if (userIsAdmin) return;
 
@@ -77,29 +75,40 @@ function wasSentInTheLast24Hours (embed) {
   return momentSentAt.isSameOrAfter(twentyFourHoursAgo);
 }
 
-async function editQuestionAndMessageAlreadySent (embed, question, questionID, messageID, interaction) {
-  const channel = await bot.channels.fetch(process.env.QUESTIONS_CHANNEL_ID) || await bot.channels.cache.get(process.env.QUESTIONS_CHANNEL_ID);
-  const message = await channel.messages.fetch(messageID) || await channel.messages.cache.get(messageID);
+async function editQuestionAndMessageAlreadySent(embed, question, questionID, messageID, interaction) {
+  try {
+    const channel = await bot.channels.fetch(process.env.QUESTIONS_CHANNEL_ID) || await bot.channels.cache.get(process.env.QUESTIONS_CHANNEL_ID);
+    const message = await channel.messages.fetch(messageID) || await channel.messages.cache.get(messageID);
 
-  await database.from('questions').update(question).eq('id', questionID);
-  message.edit({embeds: [embed]}).then(() => {
-    if (interaction) interaction.editReply(`**Perfeito, campeão!** Pergunta editada com sucesso. Dá uma conferida lá no ${channel.toString()}!`);
-  }).catch((error) => {
+    const { data: questionWithAllData } = await database.from('questions').update(question).eq('id', questionID).select().single();
+
+    await message.edit({ embeds: [embed] });
+
+    if (interaction) await interaction.editReply(`**Perfeito, campeão!** Pergunta editada com sucesso. Dá uma conferida lá no ${channel.toString()}!`);
+
+    return questionWithAllData;
+  } catch (error) {
     throw error;
-  });
+  }
 }
 
-async function editQuestionAndSendAgain (question, questionID, messageID, interaction) {
-  const channel = await bot.channels.fetch(process.env.QUESTIONS_CHANNEL_ID) || await bot.channels.cache.get(process.env.QUESTIONS_CHANNEL_ID);
-  const message = await channel.messages.fetch(messageID) || await channel.messages.cache.get(messageID);
+async function editQuestionAndSendAgain(question, questionID, messageID, interaction) {
+  try {
+    const channel = await bot.channels.fetch(process.env.QUESTIONS_CHANNEL_ID) || await bot.channels.cache.get(process.env.QUESTIONS_CHANNEL_ID);
+    const message = await channel.messages.fetch(messageID) || await channel.messages.cache.get(messageID);
 
-  const {data: questionWithAllData} = await database.from('questions').update(question).eq('id', questionID).select();
-  message.delete().then(() => {
-    if (interaction) interaction.editReply(`**Perfeito, campeão!** Pergunta editada com sucesso. Dá uma conferida lá no ${channel.toString()}!`);
-    sendCore.sendQuestion(questionWithAllData[0]);
-  }).catch((error) => {
+    const { data: questionWithAllData } = await database.from('questions').update(question).eq('id', questionID).select().single();
+
+    await message.delete();
+
+    if (interaction) await interaction.editReply(`**Perfeito, campeão!** Pergunta editada com sucesso. Dá uma conferida lá no ${channel.toString()}!`);
+    const sendCore = require('../core/sendCore');
+    const {data: questionUpdated} = await sendCore.sendQuestion(questionWithAllData);
+    
+    return questionUpdated;
+  } catch (error) {
     throw error;
-  });
+  }
 }
 
-module.exports = { checkAndParseQuestion, reviewQuestion, editQuestionAndMessageAlreadySent, editQuestionAndSendAgain, wasSentInTheLast24Hours }
+module.exports = { checkAndParseQuestion, reviewQuestion, editQuestionAndMessageAlreadySent, editQuestionAndSendAgain, wasSentInTheLast24Hours, searchForSimilarQuestions }

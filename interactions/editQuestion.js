@@ -12,26 +12,30 @@ async function editQuestion (interaction) {
   }
 }
 
-async function editQuestionAlreadySent (interaction) {
-  await interaction.deferReply();
+async function editQuestionAlreadySent (interaction, editedQuestion, currentQuestion, userIsAdmin, questionID) {
+  if (!editedQuestion && !currentQuestion) {
+    await interaction.deferReply();
   
-  const userID = interaction.user.id;
-  const userIsAdmin = userID == '668199172276748328' || interaction.member?.permissions.has([PermissionsBitField.Flags.Administrator]) || false;
-  const fields = interaction.fields;
-  const dataOnId = interaction.customId.split('_');
-  const questionID = dataOnId[2];
+    const userID = interaction.user.id;
+    userIsAdmin = admins.includes(userID);
+    const fields = interaction.fields;
+    const dataOnId = interaction.customId.split('_');
+    questionID = dataOnId[2];
+    
+    // question, options, description, footer, image, author, status
+    editedQuestion = await checkAndParseQuestion(
+      fields.getTextInputValue('question'),
+      fields.getTextInputValue('options'),
+      fields.getTextInputValue('description'),
+      fields.getTextInputValue('footer'),
+      fields.getTextInputValue('image'),
+      userID,
+      3
+    );
+    const { data: currentQuestionData } = await database.from('questions').select().eq('id', questionID);
+    currentQuestion = currentQuestionData;
+  }
   
-  // question, options, description, footer, image, author, status
-  const editedQuestion = await checkAndParseQuestion(
-    fields.getTextInputValue('question'),
-    fields.getTextInputValue('options'),
-    fields.getTextInputValue('description'),
-    fields.getTextInputValue('footer'),
-    fields.getTextInputValue('image'),
-    userID,
-    3
-  );
-  const { data: currentQuestion } = await database.from('questions').select().eq('id', questionID);
   editedQuestion.sentAt = currentQuestion[0].sentAt;
   editedQuestion.createdAt = currentQuestion[0].createdAt;
   editedQuestion.id = currentQuestion[0].id;
@@ -41,13 +45,14 @@ async function editQuestionAlreadySent (interaction) {
   if (editedQuestion.options.find(({emoji, text}) => emoji.startsWith('$'))) deleteMessage = true;
   if (userIsAdmin) {
     if (deleteMessage) {
-      await editQuestionAndSendAgain(editedQuestion, questionID, currentQuestion[0].messageID, interaction);
+      return await editQuestionAndSendAgain(editedQuestion, questionID, currentQuestion[0].messageID, interaction);
     } else {
       const embed = transformQuestionsDataToEmbed(editedQuestion, false);
-      await editQuestionAndMessageAlreadySent(embed, editedQuestion, questionID, currentQuestion[0].messageID, interaction);
+      return await editQuestionAndMessageAlreadySent(embed, editedQuestion, questionID, currentQuestion[0].messageID, interaction);
     }
   } else {
     await reviewQuestion(editedQuestion, interaction, userIsAdmin, 'editQuestion');
+    return editedQuestion;
   }
 }
 
@@ -55,7 +60,7 @@ async function editQuestionNotSent (interaction) {
   await interaction.deferReply();
   
   const userID = interaction.user.id;
-  const userIsAdmin = userID == '668199172276748328' || interaction.member?.permissions.has([PermissionsBitField.Flags.Administrator]) || false;
+  const userIsAdmin = admins.includes(userID);
   const fields = interaction.fields;
   const dataOnId = interaction.customId.split('_');
   const questionID = dataOnId[2];
@@ -92,4 +97,4 @@ async function editQuestionNotSent (interaction) {
   interaction.message.edit(message);
 }
 
-module.exports = {editQuestion}
+module.exports = {editQuestion, editQuestionAlreadySent}

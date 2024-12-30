@@ -9,7 +9,7 @@ const properties = new SlashCommandBuilder()
   .setDMPermission(false);
 
 async function execute (interaction) {
-  const userIsAdmin = interaction.user.id == '668199172276748328' || interaction.member.permissions.has([PermissionsBitField.Flags.Administrator]);
+  const userIsAdmin = admins.includes(interaction.user.id);
 
   if (!userIsAdmin) {
     interaction.reply({content: '**Irmão, esqueça.** Você não é admin, não adianta.', ephemeral: true});

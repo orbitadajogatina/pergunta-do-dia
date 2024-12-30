@@ -5,7 +5,7 @@ async function execute (interaction) {
   await interaction.deferReply();
   
   const userID = interaction.user.id;
-  const userIsAdmin = userID == '668199172276748328' || interaction.member?.permissions.has([PermissionsBitField.Flags.Administrator]) || false;
+  const userIsAdmin = admins.includes(userID);
   const fields = interaction.fields;
   
   // question, options, description, footer, image, author, status

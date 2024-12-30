@@ -5,7 +5,7 @@ const DiscordEmojis = require('discord-emojis-parser');
 let numberedListEmojiCount = -1;
 
 async function emojiFromURL(urls) {
-  if (urls.length < 1) throw {from: 'user', content: '**Eita.** Erro ao criar emoji com base em imagem.'};
+  if (urls.length < 1) throw {from: 'user', content: '**Eita.** Erro ao criar emoji com base em imagem. (length = 0)'};
   let chosenUrls = [];
   
   for (let index = 0; index < urls.length; index++) {
