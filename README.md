@@ -62,6 +62,8 @@ ADMIN_GUILD_ID=id-do-servidor-administrativo
 ADMIN_ROLE_ID=id-do-cargo-administrativo
 ```
 
+> Mais dúvidas use de base o arquivo [`.env.example`](/.env.example)
+
 ## **Executando o Bot**
 
 Após configurar as variáveis de ambiente:
