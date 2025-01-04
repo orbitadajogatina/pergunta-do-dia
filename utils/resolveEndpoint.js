@@ -10,8 +10,8 @@ async function resolveEndpoint(req, res, endpoint, method, apiAuthorization) {
     }
 
     const authorization = await apiAuthorization(req.get('Authorization')?.split(' ')[1]);
-    if (!authorization) return res.status(401).send('Inválido ou falta o token de autorização.');
-    if (authorization === 'suspended') return res.status(403).send('Suspenso.');
+    if (!authorization) return res.status(401).send('`Invalid token. Please get your API key on Discord using the bot or through the website.');
+    if (authorization === 'suspended') return res.status(403).send('You are suspended. Please contact Enzo.');
 
     try {
         const module = require(modulePath);
@@ -19,10 +19,10 @@ async function resolveEndpoint(req, res, endpoint, method, apiAuthorization) {
             const result = await module[method](req, res, authorization);
             return res.json(result);
         }
-        res.status(404).send(`Método ${method.toUpperCase()} não suportado.`);
+        res.status(404).send(`${method.toUpperCase()} method not available for this endpoint: ${param}`);
     } catch (error) {
-        console.error(`Erro no endpoint: ${endpoint}`, error);
-        res.status(500).send('Erro interno.');
+        console.error(`Error loading module: ${endpoint}`, error);
+        res.status(500).send(`Error: ${error.message}`);
     }
 }
 

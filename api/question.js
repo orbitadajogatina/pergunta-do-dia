@@ -22,7 +22,7 @@ async function get(req, res, authorization) {
   
   if (!question) throw { status: 404, message: "Question doesn't exist." };
   if (question.status !== 3 && authorization.owner !== question.author) {
-    throw { status: 403, message: "Proíbido. A pergunta não foi enviada ainda, mas você não é o dono dela." };
+    throw { status: 403, message: "Forbidden. Question not sent yet and you aren't the owner." };
   }
 
   // Obter e limpar dados do usuário
@@ -54,11 +54,11 @@ async function post(req, res, authorization) {
   
   // Validação de dados
   validateFields([
-    { condition: !newQuestion.title, message: "Falta a pergunta né meu filho." },
-    { condition: !newQuestion.options, message: "Falta algumas opções na pergunta." },
-    { condition: newQuestion.title.length < 5 || newQuestion.title.length > 150, message: 'Título inválido. esperado tamanho de 0 até 150 em caracteres.' },
-    { condition: newQuestion.description?.length > 350, message: 'Descrição inválida. esperado tamanho de 0 até 350 em caracteres.' },
-    { condition: newQuestion.footer?.length > 200, message: 'Footer inválido. esperado tamanho de 0 até 200 em caracteres.' }
+    { condition: !newQuestion.title, message: "Missing question's question." },
+    { condition: !newQuestion.options, message: "Missing question's options." },
+    { condition: newQuestion.title.length < 5 || newQuestion.title.length > 150, message: 'Invalid title length. 5 to 150 characters.' },
+    { condition: newQuestion.description?.length > 350, message: 'Invalid description length. 0 to 350 characters.' },
+    { condition: newQuestion.footer?.length > 200, message: 'Invalid footer length. 0 to 200 characters.' }
   ]);
 
   const userID = authorization.owner;
@@ -102,15 +102,15 @@ async function patch(req, res, authorization) {
   const { data: currentQuestion } = await database.from('questions').select().eq(id.startsWith('_') ? 'messageID' : 'id', id.replace('_', '')).single();
   
   if (!currentQuestion) throw { status: 404, message: "Question doesn't exist." };
-  if (currentQuestion.author !== userID) throw { status: 403, message: "Proíbido. Você felizmente não é o dono." };
+  if (currentQuestion.author !== userID) throw { status: 403, message: "Forbidden. You aren't the owner." };
 
   // Validação de dados
   validateFields([
-    { condition: !editedQuestionData.title, message: "Falta a pergunta né meu filho." },
-    { condition: !editedQuestionData.options, message: "Falta alguams opções na pergunta." },
-    { condition: editedQuestionData.title.length < 5 || editedQuestionData.title.length > 150, message: 'Título inválido. esperado tamanho de 0 até 150 em caracteres.' },
-    { condition: editedQuestionData.description?.length > 350, message: 'Descrição inválida. esperado tamanho de 0 até 350 em caracteres.' },
-    { condition: editedQuestionData.footer?.length > 200, message: 'Footer inválido. esperado tamanho de 0 até 200 em caracteres.' }
+    { condition: !editedQuestionData.title, message: "Missing question's question." },
+    { condition: !editedQuestionData.options, message: "Missing question's options." },
+    { condition: editedQuestionData.title.length < 5 || newQuestion.title.length > 150, message: 'Invalid title length. 5 to 150 characters.' },
+    { condition: editedQuestionData.description?.length > 350, message: 'Invalid description length. 0 to 350 characters.' },
+    { condition: editedQuestionData.footer?.length > 200, message: 'Invalid footer length. 0 to 200 characters.' }
   ]);
 
   try {
@@ -148,9 +148,9 @@ async function del(req, res, authorization) {
   const id = req.params.id.toString();
   const { data: question } = await database.from('questions').select().eq(id.startsWith('_') ? 'messageID' : 'id', id.replace('_', '')).single();
 
-  if (!question) throw { status: 404, message: "Essa pergunta não existe." };
+  if (!question) throw { status: 404, message: "Question doesn't exist." };
   if (question.status === 3 || authorization.owner !== question.author) {
-    throw { status: 403, message: "Proíbido. Essa pergunta já foi enviada e você não é o dono dela 😊." };
+    throw { status: 403, message: "Forbidden. Question already sent and/or you aren't the owner." };
   }
 
   const { data } = await database.from('questions').delete().eq('id', question.id).select().single();

@@ -4,20 +4,24 @@ const express = require('express');
 const { resolveEndpoint } = require('../utils/resolveEndpoint');
 const { apiAuthorization } = require('../utils/apiAuthorization');
 
-const botWeb = express();
+const web = express();
 
 function initializeWeb() {
-    botWeb.use(express.json());
+    web.use(express.json());
 
-    botWeb.get('/', (_, res) => res.send('API e site disponíveis.'));
+    web.get('/', (_, res) => res.send('<div>❔📆🥰 - Pergunta do Dia no ar!</div><br><br><div style="font-weight: bold;">Confira o bacaníssimo cliente web oficial em: - ainda tá sendo desenvolvido -</div>'));
 
-    botWeb.use('/api/v1/:endpoint', async (req, res) => {
+    web.get('/api/', async (req, res) => {
+        res.status(200).send(`No momento, a única forma de obter uma chave da API é utilizando o comando /token pelo bot no Discord. Observe que, se você já tem uma chave, utilizar o comando te trará uma nova chave e fará a antiga ser inutilizável.`);
+    });
+
+    web.use('/api/v1/:endpoint', async (req, res) => {
         const { endpoint } = req.params;
         const method = req.method.toLowerCase();
         await resolveEndpoint(req, res, endpoint, method, apiAuthorization);
     });
 
-    botWeb.listen(3000, () => console.log('API disponível em http://localhost:3000'));
+    web.listen(3000, () => console.log('API e site disponível em http://localhost:3000'));
 }
 
 module.exports = { initializeWeb };
