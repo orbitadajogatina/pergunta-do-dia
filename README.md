@@ -4,7 +4,7 @@ O **Pergunta do Dia** é um bot projetado para servidores Discord, permitindo a 
 
 ## Descrição Geral
 
-O **Pergunta do Dia Bot** envia perguntas diárias para um canal designado em seu servidor Discord, fomentando conversas, debates e trocas de ideias entre os membros. É uma ferramenta ideal para fortalecer comunidades e conhecer as opiniões das pessoas de forma divertida e interativa.
+O **Pergunta do Dia** envia perguntas diárias para um canal designado em seu servidor Discord, fomentando conversas, debates e trocas de ideias entre os membros. É uma ferramenta ideal para fortalecer comunidades e conhecer as opiniões das pessoas de forma divertida e interativa.
 
 ## Funcionalidades
 
