@@ -1,27 +1,37 @@
-'use strict';
+"use strict";
 
-const express = require('express');
-const { resolveEndpoint } = require('../utils/resolveEndpoint');
-const { apiAuthorization } = require('../utils/apiAuthorization');
+const express = require("express");
+const { resolveEndpoint } = require("../utils/resolveEndpoint");
+const { apiAuthorization } = require("../utils/apiAuthorization");
 
 const web = express();
 
 function initializeWeb() {
-    web.use(express.json());
+  web.use(express.json());
 
-    web.get('/', (_, res) => res.send('<div>❔📆🥰 - Pergunta do Dia no ar!</div><br><br><div style="font-weight: bold;">Confira o bacaníssimo cliente web oficial em: - ainda tá sendo desenvolvido -</div>'));
+  web.get("/", (_, res) =>
+    res.send(
+      '<div>❔📆🥰 - Pergunta do Dia no ar!</div><br><br><div style="font-weight: bold;">Confira o bacaníssimo cliente web oficial em: - ainda tá sendo desenvolvido -</div>'
+    )
+  );
 
-    web.get('/api/', async (req, res) => {
-        res.status(200).send(`No momento, a única forma de obter uma chave da API é utilizando o comando /token pelo bot no Discord. Observe que, se você já tem uma chave, utilizar o comando te trará uma nova chave e fará a antiga ser inutilizável.`);
-    });
+  web.get("/api/", async (req, res) => {
+    res
+      .status(200)
+      .send(
+        `No momento, a única forma de obter uma chave da API é utilizando o comando /token pelo bot no Discord. Observe que, se você já tem uma chave, utilizar o comando te trará uma nova chave e fará a antiga ser inutilizável.`
+      );
+  });
 
-    web.use('/api/v1/:endpoint', async (req, res) => {
-        const { endpoint } = req.params;
-        const method = req.method.toLowerCase();
-        await resolveEndpoint(req, res, endpoint, method, apiAuthorization);
-    });
+  web.use("/api/v1/:endpoint", async (req, res) => {
+    const { endpoint } = req.params;
+    const method = req.method.toLowerCase();
+    await resolveEndpoint(req, res, endpoint, method, apiAuthorization);
+  });
 
-    web.listen(3000, () => console.log('API e site disponível em http://localhost:3000'));
+  web.listen(3000, () =>
+    console.log("API e site disponível em http://localhost:3000")
+  );
 }
 
 module.exports = { initializeWeb };

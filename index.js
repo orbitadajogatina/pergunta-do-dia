@@ -1,14 +1,16 @@
-'use strict';
+// Pergunta do Dia Bot 1.2.0 - criado pelo Enzo da Órbita da Jogatina
 
-const { initializeBot } = require('./app/bot');
-const { initializeWeb } = require('./app/web');
-const { initializeDatabase } = require('./app/database');
-const dotenv = require('dotenv');
+"use strict";
+
+const { initializeBot } = require("./app/bot");
+const { initializeWeb } = require("./app/web");
+const { initializeDatabase } = require("./app/database");
+const dotenv = require("dotenv");
 
 dotenv.config();
 
 (async () => {
-    await initializeBot();
-    initializeDatabase()
-    initializeWeb();
+  await initializeBot();
+  initializeDatabase();
+  initializeWeb();
 })();
