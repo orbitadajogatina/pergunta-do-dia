@@ -7,6 +7,9 @@
     "discord",
     "bot"
   ],
+  "scripts": {
+    "start": "node index.js"
+  },
   "author": "odj",
   "license": "ISC",
   "dependencies": {
