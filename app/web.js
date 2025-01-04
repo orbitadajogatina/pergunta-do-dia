@@ -1,14 +1,12 @@
 'use strict';
 
 const express = require('express');
-const cookieParser = require('cookie-parser');
 const { resolveEndpoint } = require('../utils/resolveEndpoint');
 const { apiAuthorization } = require('../utils/apiAuthorization');
 
 const botWeb = express();
 
 function initializeWeb() {
-    botWeb.use(cookieParser());
     botWeb.use(express.json());
 
     botWeb.get('/', (_, res) => res.send('API e site disponíveis.'));

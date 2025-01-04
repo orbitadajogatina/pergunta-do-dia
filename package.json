@@ -16,7 +16,6 @@
     "@supabase/supabase-js": "^2.2.0",
     "async-g-i-s": "^1.5.5",
     "axios": "^1.2.1",
-    "cookie-parser": "^1.4.7",
     "cron": "^2.4.4",
     "discord-emojis-parser": "^1.0.6",
     "discord.js": "^14.16.3",
