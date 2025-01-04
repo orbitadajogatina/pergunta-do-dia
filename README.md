@@ -1,6 +1,6 @@
 # Pergunta do Dia Bot(v1.1.1)
 
-O **Pergunta do Dia Bot** é um bot projetado para servidores Discord, permitindo a interação diária entre membros por meio de perguntas cuidadosamente selecionadas. Este guia detalhado abrange desde como configurar o bot até colaborar com seu código via forks e contribuições
+O **Pergunta do Dia** é um bot projetado para servidores Discord, permitindo a interação diária entre membros por meio de perguntas cuidadosamente selecionadas. Este guia detalhado abrange desde como configurar o bot até colaborar com seu código via forks e contribuições
 
 ## Descrição Geral
 
@@ -78,7 +78,7 @@ Após configurar as variáveis de ambiente:
 
 ## **API do Bot**
 
-O bot possui uma API para gerenciar perguntas e outras funcionalidades. Consulte a [documentação oficial da API](https://orbitadajogatina.mintlify.app/introduction) para mais detalhes.
+O bot possui uma API para gerenciar perguntas e outras funcionalidades. Consulte a [documentação oficial da API](https://rbitadajogatina.mintlify.app/introduction) para mais detalhes.
 
 ## Solução de Problemas
 
