@@ -4,8 +4,8 @@ const { createClient } = require('@supabase/supabase-js');
 
 const database = createClient('https://onlntxblavzgsutdbson.supabase.co', process.env.SUPABASE_TOKEN);
 
-function getDatabase() {
+function declareDatabase() {
     global.database = database;
 }
 
-module.exports = { getDatabase };
+module.exports = { declareDatabase };
