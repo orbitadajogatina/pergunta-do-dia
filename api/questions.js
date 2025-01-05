@@ -48,10 +48,6 @@ async function getQuestionByID(id, owner) {
     const message = await channel.messages.fetch(question.messageID) || await channel.messages.cache.get(question.messageID);
     
     const reactions = await message.reactions.cache.toJSON();
-    question.options.forEach((option, index) => {
-      const currentReaction = reactions[index];
-      option.votes = currentReaction ? currentReaction.count - 1 : 0; // Subtrai 1 para não contar o bot
-    });
     for (let index = 0; index < reactions.length; index++) {
       const currentReaction = reactions[index];
       question.options[index].votes = currentReaction.count - 1;
