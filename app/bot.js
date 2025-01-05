@@ -1,6 +1,6 @@
 "use strict";
 
-const { Client, GatewayIntentBits, Partials } = require("discord.js");
+const { Client, GatewayIntentBits, Partials, Options } = require("discord.js");
 
 const bot = new Client({
   intents: [
@@ -11,6 +11,13 @@ const bot = new Client({
     GatewayIntentBits.DirectMessages,
   ],
   partials: [Partials.Channel],
+  sweepers: {
+    ...Options.DefaultSweeperSettings,
+    messages: {
+			interval: 1800,
+			lifetime: 900,
+		}
+  }
 });
 
 async function initializeBot() {
