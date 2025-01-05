@@ -115,7 +115,7 @@ async function post(req, res, authorization) {
   }
 }
 
-// PUT /questions
+// PUT /questions/id
 async function put(req, res, authorization) {
   const editedQuestionData = req.body;
   editedQuestionData.options = editedQuestionData.options.replace(/\\n/g, '\n');
@@ -168,7 +168,7 @@ async function put(req, res, authorization) {
   }
 }
 
-// DELETE: Apagar uma pergunta específica
+// DELETE /questions/id
 async function del(req, res, authorization) {
   const id = req.params.id.toString();
   const column = id.startsWith('_') ? 'messageID' : 'id';
