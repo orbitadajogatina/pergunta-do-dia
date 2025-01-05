@@ -2,12 +2,12 @@
 
 "use strict";
 
+const dotenv = require("dotenv");
+dotenv.config();
+
 const { initializeBot } = require("./app/bot");
 const { initializeWeb } = require("./app/web");
 const { initializeDatabase } = require("./app/database");
-const dotenv = require("dotenv");
-
-dotenv.config();
 
 (async () => {
   initializeDatabase();
