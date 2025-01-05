@@ -11,7 +11,7 @@ async function resolveEndpoint(req, res, endpoint, method, apiAuthorization) {
   if (authorization === false) {
     return res.status(401).send(`Invalid token. Please get your API key on Discord using the bot or through the website.`);
   } else if (authorization === 'suspended') {
-    return res.status(403).send(`You are suspended. Please contact Enzo.`);
+    return res.status(403).send(`You are suspended. Please contact ${process.env.SUPER_ADMIN_NAME}.`);
   }
 
   try {

@@ -60,9 +60,12 @@ SUPABASE_TOKEN=seu-token-supabase
 MANAGE_CHANNEL_ID=id-do-canal-de-gerenciamento-de-perguntas
 QUESTIONS_CHANNEL_ID=id-do-canal-de-envio-de-perguntas
 EMOJI_GUILD_ID=id-do-servidor-para-salvar-emojis-personalizados
-ROLE_ID=id-do-cargo-para-mencionar-usuários
+USERS_ROLE_ID=id-do-cargo-para-mencionar-usuários
 ADMIN_GUILD_ID=id-do-servidor-de-gerenciamento-de-perguntas
 ADMIN_ROLE_ID=id-do-cargo-de-gerenciamento-de-perguntas
+BACKUP_CHANNEL_ID=id-do-canal-de-backup-do-banco-de-dados
+SUPER_ADMIN_ID=id-do-administrador-principal
+SUPER_ADMIN_NAME=nome-do-administrador-principal
 ```
 
 > Mais dúvidas use de base o arquivo [`.env.example`](/.env.example)

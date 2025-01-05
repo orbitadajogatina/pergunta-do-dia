@@ -32,7 +32,7 @@ async function getAdmins(bot) {
   const adminGuild = await bot.guilds.fetch(process.env.ADMIN_GUILD_ID);
   const members = await adminGuild.members.fetch();
   return [
-    "668199172276748328",
+    process.env.SUPER_ADMIN_ID,
     ...members
       .filter((m) => m.roles.cache.has(process.env.ADMIN_ROLE_ID))
       .map((m) => m.id),
