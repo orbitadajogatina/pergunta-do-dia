@@ -190,7 +190,7 @@ function runCron () {
   
   new CronJob('0 12-20 * * *', async () => {
     try {
-      global.admins = await getAdmins();
+      global.admins = await getAdmins(bot);
     } catch (err) {
       console.error(err, 'cron-get-admins')
     }
