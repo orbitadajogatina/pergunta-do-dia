@@ -7,7 +7,7 @@ async function resolveEndpoint(req, res, endpoint, method, apiAuthorization) {
   const modulePath = path.resolve(__dirname, "../api", endpoint);
   if (!fs.existsSync(`${modulePath}.js`)) return res.status(404).send(`Endpoint inválido: ${endpoint}`);
 
-  const authorization = await apiAuthorization(req.get("Authorization").match(/Bearer (.*)/)?.[1]);
+  const authorization = await apiAuthorization(req.get("Authorization")?.match(/Bearer (.*)/)?.[1]);
   if (authorization === false) {
     return res.status(401).send(`Invalid token. Please get your API key on Discord using the bot or through the website.`);
   } else if (authorization === 'suspended') {
