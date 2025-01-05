@@ -16,7 +16,7 @@ async function resolveEndpoint(req, res, endpoint, method, apiAuthorization) {
 
   try {
     const module = require(modulePath);
-    // if (method === 'delete') method = 'del';
+    if (method === 'delete') method = 'del';
 
     if (typeof module[method] === "function") {
       const result = await module[method](req, res, authorization);
