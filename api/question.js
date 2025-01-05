@@ -91,8 +91,8 @@ async function post(req, res, authorization) {
   }
 }
 
-// PATCH: Editar uma pergunta específica
-async function patch(req, res, authorization) {
+// PUT: Editar uma pergunta específica
+async function put(req, res, authorization) {
   const editedQuestionData = req.body;
   editedQuestionData.options = editedQuestionData.options.replace(/\\n/g, '\n');
 
@@ -157,4 +157,4 @@ async function del(req, res, authorization) {
   return data;
 }
 
-module.exports = { get, post, patch, del };
+module.exports = { get, post, put, del };
