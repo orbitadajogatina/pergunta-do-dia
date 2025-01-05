@@ -5,7 +5,7 @@ const fs = require("fs");
 
 async function resolveEndpoint(req, res, endpoint, method, apiAuthorization) {
   const modulePath = path.resolve(__dirname, "../api", endpoint);
-  if (!fs.existsSync(`${modulePath}.js`)) return res.status(404).send(`Endpoint inválido: ${endpoint}`);
+  if (!fs.existsSync(`${modulePath}.js`)) return res.status(404).send(`Invalid endpoint: ${endpoint}`);
 
   const authorization = await apiAuthorization(req.get("Authorization")?.match(/Bearer (.*)/)?.[1]);
   if (authorization === false) {
