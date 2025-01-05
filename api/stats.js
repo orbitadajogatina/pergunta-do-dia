@@ -2,9 +2,7 @@ const moment = require("moment-timezone");
 
 async function get(req) {
   const { query } = req;
-  const { data: questionsData } = await database
-    .from("questions")
-    .select("status,author");
+  const { data: questionsData } = await database.from("questions").select("status,author");
 
   const questionStatusCounts = questionsData.reduce((acc, { status }) => {
     acc[status] = (acc[status] || 0) + 1;
