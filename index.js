@@ -10,7 +10,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 (async () => {
-  await initializeBot();
   initializeDatabase();
+  await initializeBot();
   initializeWeb();
 })();

@@ -3,7 +3,6 @@
 const { Client, GatewayIntentBits, Partials } = require("discord.js");
 const { deployCommands } = require("../core/commandsCore");
 const { deployEvents } = require("../core/eventsCore");
-const { getAdmins } = require("../utils/apiAuthorization");
 
 const bot = new Client({
   intents: [
@@ -24,4 +23,15 @@ async function initializeBot() {
   global.admins = await getAdmins(bot);
 }
 
-module.exports = { initializeBot };
+async function getAdmins(bot) {
+  const adminGuild = await bot.guilds.fetch(process.env.ADMIN_GUILD_ID);
+  const members = await adminGuild.members.fetch();
+  return [
+    "668199172276748328",
+    ...members
+      .filter((m) => m.roles.cache.has(process.env.ADMIN_ROLE_ID))
+      .map((m) => m.id),
+  ];
+}
+
+module.exports = { initializeBot, getAdmins };

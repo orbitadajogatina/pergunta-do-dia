@@ -1,6 +1,7 @@
 const moment = require('moment-timezone');
 const transformQuestionsDataToEmbed = require('../core/transformQuestionsDataToEmbed');
 const { checkAndParseQuestion } = require('../core/questionManager');
+const { getAdmins } = require('../app/bot')
 const axios = require('axios');
 const FormData = require('form-data');
 const { JSDOM } = require('jsdom');
@@ -189,7 +190,7 @@ function runCron () {
   
   new CronJob('0 12-20 * * *', async () => {
     try {
-      global.admins = await global.getAdmins();
+      global.admins = await getAdmins();
     } catch (err) {
       console.error(err, 'cron-get-admins')
     }
