@@ -23,7 +23,7 @@ function initializeWeb() {
       );
   });
 
-  web.use("/api/v1/:endpoint", async (req, res) => {
+  web.use("/api/v1/:endpoint/:id?", async (req, res) => {
     const { endpoint } = req.params;
     const method = req.method.toLowerCase();
     await resolveEndpoint(req, res, endpoint, method, apiAuthorization);
