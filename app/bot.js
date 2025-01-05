@@ -1,8 +1,6 @@
 "use strict";
 
 const { Client, GatewayIntentBits, Partials } = require("discord.js");
-const { deployCommands } = require("../core/commandsCore");
-const { deployEvents } = require("../core/eventsCore");
 
 const bot = new Client({
   intents: [
@@ -16,10 +14,10 @@ const bot = new Client({
 });
 
 async function initializeBot() {
-  deployCommands();
-  deployEvents();
-  await bot.login(process.env.DISCORD_TOKEN);
   global.bot = bot;
+  require('../core/commandsCore').deployCommands();
+  require('../core/eventsCore').deployEvents();
+  await bot.login(process.env.DISCORD_TOKEN);
   global.admins = await getAdmins(bot);
 }
 
