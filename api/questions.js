@@ -133,7 +133,7 @@ async function put(req, res, authorization) {
   validateFields([
     { condition: !editedQuestionData.title, message: "Missing question's question." },
     { condition: !editedQuestionData.options, message: "Missing question's options." },
-    { condition: editedQuestionData.title.length < 5 || newQuestion.title.length > 150, message: 'Invalid title length. 5 to 150 characters.' },
+    { condition: editedQuestionData.title.length < 5 || editedQuestionData.title.length > 150, message: 'Invalid title length. 5 to 150 characters.' },
     { condition: editedQuestionData.description?.length > 350, message: 'Invalid description length. 0 to 350 characters.' },
     { condition: editedQuestionData.footer?.length > 200, message: 'Invalid footer length. 0 to 200 characters.' }
   ]);
