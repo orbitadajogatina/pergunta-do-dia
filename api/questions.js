@@ -34,9 +34,7 @@ async function getQuestionByID(id, owner) {
   const { data: question } = await database.from('questions').select().eq(column, id.replace('_', '')).single();
   
   if (!question) throw { status: 404, message: "Question doesn't exist." };
-  if (question.status !== 3 && owner !== question.author) {
-    throw { status: 403, message: "Forbidden. Question not sent yet and you aren't the owner." };
-  }
+  if (question.status !== 3 && owner !== question.author) throw { status: 403, message: "Forbidden. Question not sent yet and you aren't the owner." };
 
   // Obter e limpar dados do usuário
   const discordUser = await bot.users.fetch(question.author);
@@ -73,7 +71,7 @@ async function get(req, res, authorization) {
   return await getQuestionByID(id, authorization.owner);
 }
 
-// POST: Adicionar uma nova pergunta
+// POST /questions
 async function post(req, res, authorization) {
   const newQuestion = req.body;
   newQuestion.options = newQuestion.options.replace(/\\n/g, '\n');
@@ -117,7 +115,7 @@ async function post(req, res, authorization) {
   }
 }
 
-// PUT: Editar uma pergunta específica
+// PUT /questions
 async function put(req, res, authorization) {
   const editedQuestionData = req.body;
   editedQuestionData.options = editedQuestionData.options.replace(/\\n/g, '\n');
@@ -125,7 +123,8 @@ async function put(req, res, authorization) {
   const userID = authorization.owner;
   const userIsAdmin = admins.includes(userID);
   const id = req.params.id.toString();
-  const { data: currentQuestion } = await database.from('questions').select().eq(id.startsWith('_') ? 'messageID' : 'id', id.replace('_', '')).single();
+  const column = id.startsWith('_') ? 'messageID' : 'id';
+  const { data: currentQuestion } = await database.from('questions').select().eq(column, id.replace('_', '')).single();
   
   if (!currentQuestion) throw { status: 404, message: "Question doesn't exist." };
   if (currentQuestion.author !== userID) throw { status: 403, message: "Forbidden. You aren't the owner." };
@@ -172,12 +171,11 @@ async function put(req, res, authorization) {
 // DELETE: Apagar uma pergunta específica
 async function del(req, res, authorization) {
   const id = req.params.id.toString();
-  const { data: question } = await database.from('questions').select().eq(id.startsWith('_') ? 'messageID' : 'id', id.replace('_', '')).single();
+  const column = id.startsWith('_') ? 'messageID' : 'id';
+  const { data: question } = await database.from('questions').select().eq(column, id.replace('_', '')).single();
 
   if (!question) throw { status: 404, message: "Question doesn't exist." };
-  if (question.status === 3 || authorization.owner !== question.author) {
-    throw { status: 403, message: "Forbidden. Question already sent and/or you aren't the owner." };
-  }
+  if (question.status === 3 || authorization.owner !== question.author) throw { status: 403, message: "Forbidden. Question already sent and/or you aren't the owner." };
 
   const { data } = await database.from('questions').delete().eq('id', question.id).select().single();
   return data;
