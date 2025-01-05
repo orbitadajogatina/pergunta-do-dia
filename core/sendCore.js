@@ -165,7 +165,7 @@ async function sendQuestion (question) {
   try {
     const embed = transformQuestionsDataToEmbed(question, false);
     const channel = await bot.channels.fetch(process.env.QUESTIONS_CHANNEL_ID) || await bot.channels.cache.get(process.env.QUESTIONS_CHANNEL_ID);
-    message = await channel.send({content: `<@&${process.env.ROLE_ID}>`, embeds: [embed]});
+    message = await channel.send({content: `<@&${process.env.USERS_ROLE_ID}>`, embeds: [embed]});
     await addOptionsAsReaction(message, question.options);
     const thread = await message.startThread({
       name: 'Discussão',
@@ -185,6 +185,29 @@ async function main () {
   sendQuestion(await chooseQuestion());
 }
 
+async function backup() {
+  const tables = ['questions', 'variables', 'api'];
+  const files = [];
+
+  for (const table of tables) {
+    let query = database.from(table).select();
+
+    if (table === 'questions') query = query.order('createdAt', { ascending: false });
+
+    const { data } = await query.csv();
+
+    if (!data) {
+      console.error(`No data returned for table: ${table}`);
+      continue;
+    }
+
+    files.push({ attachment: Buffer.from(data, 'utf-8'), name: `${table}.csv` });
+  }
+
+  const channel = await bot.channels.fetch(process.env.BACKUP_CHANNEL_ID);
+  await channel.send({ content: 'Backup do Dia!', files });
+}
+
 function runCron () {
   const CronJob = require('cron').CronJob;
   
@@ -197,6 +220,7 @@ function runCron () {
     database.from('questions').select('sentAt').gte('sentAt', moment.tz(moment(), 'America/Sao_Paulo').format('YYYY-MM-DD')).then(res => {
       if (res.data.length == 0) {
         main();
+        backup();
       }
     }).catch(err => {
       console.error(err, 'cron');
@@ -204,4 +228,4 @@ function runCron () {
   }, null, true, 'America/Sao_Paulo');
 }
 
-module.exports = { main, runCron, sendQuestion, checkIfQuestionAlreadyExist, generateQuestion };
+module.exports = { main, runCron, sendQuestion, checkIfQuestionAlreadyExist, generateQuestion, backup };
