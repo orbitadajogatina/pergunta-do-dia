@@ -14,3 +14,6 @@ const { initializeDatabase } = require("./app/database");
   await initializeBot();
   initializeWeb();
 })();
+
+process.on('unhandledRejection', (reason, promise) => console.error(reason, promise));
+process.on('uncaughtException', (reason, origin) => console.error(reason, origin));
