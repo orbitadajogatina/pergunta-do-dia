@@ -1,4 +1,4 @@
-// Pergunta do Dia Bot 1.2.0 - criado pelo Enzo da Órbita da Jogatina
+// Pergunta do Dia Bot 1.2.1 - criado pelo Enzo da Órbita da Jogatina
 
 "use strict";
 
