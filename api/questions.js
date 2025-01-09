@@ -26,7 +26,7 @@ async function getAllQuestions(req, owner) {
     .order("sentAt")
     .range(500 * page, 499 + 500 * page);
 
-  return { questions, count: questions?.length, error };
+  return { questions, count: questions?.length, error: error ? error : undefined };
 }
 
 async function getQuestionByID(id, owner) {
