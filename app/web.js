@@ -1,6 +1,7 @@
 "use strict";
 
 const express = require("express");
+const cors = require('cors');
 const { resolveEndpoint } = require("../utils/resolveEndpoint");
 const { apiAuthorization } = require("../utils/apiAuthorization");
 
@@ -8,6 +9,7 @@ const web = express();
 
 function initializeWeb() {
   web.use(express.json());
+  web.use(cors());
 
   web.get("/", (_, res) =>
     res.send(
