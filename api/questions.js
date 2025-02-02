@@ -45,15 +45,19 @@ async function getQuestionByID(id, owner) {
 
   // Obter reações e link
   if (question.messageID) {
-    const channel = await bot.channels.fetch(process.env.QUESTIONS_CHANNEL_ID) || await bot.channels.cache.get(process.env.QUESTIONS_CHANNEL_ID);
-    const message = await channel.messages.fetch(question.messageID) || await channel.messages.cache.get(question.messageID);
-    
-    const reactions = await message.reactions.cache.toJSON();
-    for (let index = 0; index < reactions.length; index++) {
-      const currentReaction = reactions[index];
-      question.options[index].votes = currentReaction.count - 1;
+    try {
+      const channel = await bot.channels.fetch(process.env.QUESTIONS_CHANNEL_ID) || await bot.channels.cache.get(process.env.QUESTIONS_CHANNEL_ID);
+      const message = await channel.messages.fetch(question.messageID) || await channel.messages.cache.get(question.messageID);
+      
+      const reactions = await message.reactions.cache.toJSON();
+      for (let index = 0; index < reactions.length; index++) {
+        const currentReaction = reactions[index];
+        question.options[index].votes = currentReaction.count - 1;
+      }
+      question.messageLink = message.url;
+    } catch (e) {
+      console.error('error obtaining message', e)
     }
-    question.messageLink = message.url;
   }
 
   return question;
