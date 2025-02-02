@@ -6,7 +6,7 @@ const properties = new SlashCommandBuilder()
   .setDescription('Editar ou apagar uma pergunta sua ainda não enviada ou enviada nas últimas 24h.')
   .addStringOption(option =>
     option.setName('pergunta')
-      .setDescription('Pesquise por texto em perguntas, descrições e rodapés.')
+      .setDescription('Pesquise por texto em perguntas.')
       .setRequired(false))
   .addIntegerOption(option =>
     option.setName('situação')

@@ -16,7 +16,7 @@ const properties = new SlashCommandBuilder()
       .setDescription('Escolher uma pergunta.')
       .addStringOption(option =>
         option.setName('pergunta')
-          .setDescription('Pesquise por texto em perguntas, descrições e rodapés.')
+          .setDescription('Pesquise por texto em perguntas.')
           .setRequired(false)))
   .setDMPermission(false);
 

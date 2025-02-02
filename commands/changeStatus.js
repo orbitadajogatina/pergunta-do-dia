@@ -8,7 +8,7 @@ const properties = new SlashCommandBuilder()
   .setDMPermission(false)
   .addStringOption(option =>
     option.setName('pergunta')
-      .setDescription('Pesquise por texto em perguntas, descrições e rodapés.')
+      .setDescription('Pesquise por texto em perguntas.')
       .setRequired(false))
   .addIntegerOption(option =>
     option.setName('situação')

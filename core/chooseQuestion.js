@@ -45,7 +45,6 @@ function getFilters(interaction, options) {
 
 const questionsDataByCommand = {
   manageQuestion: async (interaction, options = interaction.options?.data) => {
-    let data = [];
     const userID = interaction.user.id;
     const twentyFourHoursAgo = moment.tz(moment().subtract(24, 'hours'), 'America/Sao_Paulo');
 
@@ -53,116 +52,64 @@ const questionsDataByCommand = {
     const questionFilterQuery = filters.find(filter => filter.name === 'pergunta');
     const statusFilter = filters.find(filter => filter.name === 'situação');
     
-    if (questionFilterQuery?.value) {
-      const { data: dataWithFilters } = await database
-        .from('questions')
-        .select('question, id, status, options, createdAt')
-        .eq('author', userID)
-        .or(`sentAt.is.null,sentAt.gte.${twentyFourHoursAgo.format()}}`)
-        .order('createdAt', { ascending: false })
-        .textSearch('search_columns', questionFilterQuery?.value, {config: 'english', type: 'websearch'})
-        .filter('status', statusFilter?.value.toString() ? 'eq' : 'neq', statusFilter?.value.toString() || -1);
-        
-      data = dataWithFilters;
-    } else {
-      const { data: dataWithoutFilters } = await database
-        .from('questions')
-        .select('question, id, status, options, createdAt')
-        .eq('author', userID)
-        .or(`sentAt.is.null,sentAt.gte.${twentyFourHoursAgo.format()}}`)
-        .order('createdAt', { ascending: false })
-        .filter('status', statusFilter?.value.toString() ? 'eq' : 'neq', statusFilter?.value.toString() || -1);
-
-      data = dataWithoutFilters;
-    }
+    let { data } = await database
+      .from('questions')
+      .select('question, id, status, options, createdAt')
+      .eq('author', userID)
+      .or(`sentAt.is.null,sentAt.gte.${twentyFourHoursAgo.format()}}`)
+      .order('createdAt', { ascending: false })
+      .filter('status', statusFilter?.value.toString() ? 'eq' : 'neq', statusFilter?.value.toString() || -1);
+  
+    if (questionFilterQuery?.value) data = data.filter(e => e.question.includes(questionFilterQuery?.value));
     
     return data?.sort((a, b) => a.status - b.status);
   },
   viewQuestion: async (interaction, options = interaction.options?.data) => {
-    let data = [];
     const userID = interaction.user.id;
 
     const filters = getFilters(interaction, options);
     const questionFilterQuery = filters.find(filter => filter.name === 'pergunta');
     const statusFilter = filters.find(filter => filter.name === 'situação');
     
-    if (questionFilterQuery?.value) {
-      const { data: dataWithFilters } = await database
-        .from('questions')
-        .select()
-        .textSearch('search_columns', questionFilterQuery?.value, {config: 'english', type: 'websearch'})
-        .eq('author', userID).order('createdAt', { ascending: false })
-        .filter('status', statusFilter?.value.toString() ? 'eq' : 'neq', statusFilter?.value.toString() || -1);
+    let { data } = await database
+      .from('questions')
+      .select()
+      .eq('author', userID).order('createdAt', { ascending: false })
+      .filter('status', statusFilter?.value.toString() ? 'eq' : 'neq', statusFilter?.value.toString() || -1);
+
+    if (questionFilterQuery?.value) data = data.filter(e => e.question.includes(questionFilterQuery?.value));
         
-      data = dataWithFilters;
-    } else {
-      const { data: dataWithoutFilters } = await database
-        .from('questions')
-        .select('question, id, status, options, createdAt')
-        .eq('author', userID).order('createdAt', { ascending: false })
-        .filter('status', statusFilter?.value.toString() ? 'eq' : 'neq', statusFilter?.value.toString() || -1);
-
-      data = dataWithoutFilters;
-    }
-
     return data?.sort((a, b) => a.status - b.status);
   },
   sendQuestion: async (interaction, options = interaction.options?.data) => {
-    let data = [];
-
     const filters = getFilters(interaction, options);
     const questionFilterQuery = filters.find(filter => filter.name === 'pergunta');
     
-    if (questionFilterQuery?.value) {
-      const { data: dataWithFilters } = await database
-        .from('questions')
-        .select('question, id, status, options, createdAt')
-        .eq('status', 2)
-        .is('sentAt', null)
-        .order('createdAt', { ascending: false })
-        .textSearch('search_columns', questionFilterQuery?.value, {config: 'english', type: 'websearch'});
+    let { data } = await database
+      .from('questions')
+      .select('question, id, status, options, createdAt')
+      .eq('status', 2)
+      .is('sentAt', null)
+      .order('createdAt', { ascending: false })
         
-      data = dataWithFilters;
-    } else {
-      const { data: dataWithoutFilters } = await database
-        .from('questions')
-        .select('question, id, status, options, createdAt')
-        .eq('status', 2)
-        .is('sentAt', null)
-        .order('createdAt', { ascending: false });
-
-      data = dataWithoutFilters;
-    }
+        
+    if (questionFilterQuery?.value) data = data.filter(e => e.question.includes(questionFilterQuery?.value));
 
     return data;
   },
   changeStatusOfQuestion: async (interaction, options = interaction.options?.data) => {
-    let data = [];
-
     const filters = getFilters(interaction, options);
     const questionFilterQuery = filters.find(filter => filter.name === 'pergunta');
     const statusFilter = filters.find(filter => filter.name === 'situação');
     
-    if (questionFilterQuery?.value) {
-      const { data: dataWithFilters } = await database
-        .from('questions')
-        .select('question, id, status, options, createdAt')
-        .is('sentAt', null)
-        .order('createdAt', { ascending: false })
-        .textSearch('search_columns', questionFilterQuery?.value, {config: 'english', type: 'websearch'})
-        .filter('status', statusFilter?.value.toString() ? 'eq' : 'neq', statusFilter?.value.toString() || -1);
+    let { data } = await database
+      .from('questions')
+      .select('question, id, status, options, createdAt')
+      .is('sentAt', null)
+      .order('createdAt', { ascending: false })
+      .filter('status', statusFilter?.value.toString() ? 'eq' : 'neq', statusFilter?.value.toString() || -1);
         
-      data = dataWithFilters;
-    } else {
-      const { data: dataWithoutFilters } = await database
-        .from('questions')
-        .select('question, id, status, options, createdAt')
-        .is('sentAt', null)
-        .order('createdAt', { ascending: false })
-        .filter('status', statusFilter?.value.toString() ? 'eq' : 'neq', statusFilter?.value.toString() || -1);
-
-      data = dataWithoutFilters;
-    }
+    if (questionFilterQuery?.value) data = data.filter(e => e.question.includes(questionFilterQuery?.value));
 
     return data;
   }

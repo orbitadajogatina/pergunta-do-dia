@@ -19,12 +19,13 @@ async function getAllQuestions(req, owner) {
     .select()
     .or(`status.eq.3, and(status.eq.0, author.eq.${owner}), and(status.eq.1, author.eq.${owner}), and(status.eq.2, author.eq.${owner})`);
 
-  if (search) dbQuery = dbQuery.textSearch("search_columns", search, { config: "english", type: "websearch" });
-  if (author) dbQuery = dbQuery.eq("author", author);
-
-  const { data: questions, error } = await dbQuery
+    if (author) dbQuery = dbQuery.eq("author", author);
+    
+    let { data: questions, error } = await dbQuery
     .order("sentAt")
     .range(500 * page, 499 + 500 * page);
+    
+  if (search) questions = questions.filter(e => e.question.includes(search));
 
   return { questions, count: questions?.length, error: error ? error : undefined };
 }
