@@ -4,7 +4,7 @@ const transformQuestionsDataToEmbed = require('../core/transformQuestionsDataToE
 
 async function deleteQuestion (interaction) {
   const userID = interaction.user.id;
-  if (userID !== interaction.message.interaction?.user.id) return;
+  if (userID !== (interaction.message?.interaction?.user.id || interaction.message?.interactionMetadata.user.id)) return;
   
   await interaction.deferReply();
 
@@ -21,10 +21,13 @@ async function deleteQuestion (interaction) {
 
     const questionsData = await questionsDataByCommand.manageQuestion(interaction);
     const messageWithDropdownsAndButtons = makeMessageWithDropdownsAndButtons(questionsData, 'chooseQuestion_manageQuestion', '**Ah.** Você não tem perguntas para gerenciar.');
-    await interaction.message.edit(messageWithDropdownsAndButtons);
 
+    try {
+      await interaction.message.edit(messageWithDropdownsAndButtons);
+    } catch(e) {}
+    
     await interaction.editReply({content: '**Ela partiu...** Essa questão foi apagada com sucesso!', embeds: [transformQuestionsDataToEmbed(res.data[0], true)]});
-  });
+  }).catch(console.log);
 }
 
 module.exports = {deleteQuestion}

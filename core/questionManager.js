@@ -47,9 +47,23 @@ async function reviewQuestion (question, interaction, userIsAdmin, actionType) {
 
   const embed = transformQuestionsDataToEmbed(question, true);
   let similarQuestions = await searchForSimilarQuestions(question.question, question.id);
-  if (actionType === 'newQuestion' && interaction) interaction.followUp({embeds: userIsAdmin ? [embed, ...similarQuestions] : [embed], ephemeral: true});
+  if (actionType === 'newQuestion' && interaction) {
+    if (userIsAdmin) {
+      const deleteButton = new ActionRowBuilder()
+      .addComponents(
+        new ButtonBuilder()
+          .setCustomId(`deleteQuestion_deleteQuestion_${question.id}`)
+          .setLabel('Apagar permanentemente')
+          .setStyle(ButtonStyle.Danger)
+      );
 
-  if (userIsAdmin) return;
+      interaction.followUp({embeds: [embed, ...similarQuestions.slice(0, 5)], ephemeral: true, components: similarQuestions.length > 0 ? [deleteButton] : []});
+
+      return;
+    } else {
+      interaction.followUp({embeds: [embed], ephemeral: true});
+    }
+  }
 
   const buttons = new ActionRowBuilder()
     .addComponents(
