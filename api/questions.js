@@ -50,9 +50,9 @@ async function getQuestionByID(id, owner) {
       const message = await channel.messages.fetch(question.messageID) || await channel.messages.cache.get(question.messageID);
       
       const reactions = await message.reactions.cache.toJSON();
-      for (let index = 0; index < reactions.length; index++) {
+      for (let index = 0; index < question.options.length; index++) {
         const currentReaction = reactions[index];
-        question.options[index].votes = currentReaction.count - 1;
+        question.options[index]?.votes = currentReaction.count - 1;
       }
       question.messageLink = message.url;
     } catch (e) {
