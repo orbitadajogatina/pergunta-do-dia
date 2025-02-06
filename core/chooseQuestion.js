@@ -58,9 +58,8 @@ const questionsDataByCommand = {
       .eq('author', userID)
       .or(`sentAt.is.null,sentAt.gte.${twentyFourHoursAgo.format()}}`)
       .order('createdAt', { ascending: false })
-      .filter('status', statusFilter?.value.toString() ? 'eq' : 'neq', statusFilter?.value.toString() || -1);
-  
-    if (questionFilterQuery?.value) data = data.filter(e => e.question.includes(questionFilterQuery?.value));
+      .filter('status', statusFilter?.value.toString() ? 'eq' : 'neq', statusFilter?.value.toString() || -1)
+      .ilike('question', '%' + questionFilterQuery?.value + '%');
     
     return data?.sort((a, b) => a.status - b.status);
   },
@@ -75,9 +74,8 @@ const questionsDataByCommand = {
       .from('questions')
       .select()
       .eq('author', userID).order('createdAt', { ascending: false })
-      .filter('status', statusFilter?.value.toString() ? 'eq' : 'neq', statusFilter?.value.toString() || -1);
-
-    if (questionFilterQuery?.value) data = data.filter(e => e.question.includes(questionFilterQuery?.value));
+      .filter('status', statusFilter?.value.toString() ? 'eq' : 'neq', statusFilter?.value.toString() || -1)
+      .ilike('question', '%' + questionFilterQuery?.value + '%');
         
     return data?.sort((a, b) => a.status - b.status);
   },
@@ -91,9 +89,7 @@ const questionsDataByCommand = {
       .eq('status', 2)
       .is('sentAt', null)
       .order('createdAt', { ascending: false })
-        
-        
-    if (questionFilterQuery?.value) data = data.filter(e => e.question.includes(questionFilterQuery?.value));
+      .ilike('question', '%' + questionFilterQuery?.value + '%');
 
     return data;
   },
@@ -107,9 +103,8 @@ const questionsDataByCommand = {
       .select('question, id, status, options, createdAt')
       .is('sentAt', null)
       .order('createdAt', { ascending: false })
-      .filter('status', statusFilter?.value.toString() ? 'eq' : 'neq', statusFilter?.value.toString() || -1);
-        
-    if (questionFilterQuery?.value) data = data.filter(e => e.question.includes(questionFilterQuery?.value));
+      .filter('status', statusFilter?.value.toString() ? 'eq' : 'neq', statusFilter?.value.toString() || -1)
+      .ilike('question', '%' + questionFilterQuery?.value + '%');
 
     return data;
   }

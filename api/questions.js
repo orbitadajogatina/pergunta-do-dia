@@ -19,13 +19,13 @@ async function getAllQuestions(req, owner) {
     .select()
     .or(`status.eq.3, and(status.eq.0, author.eq.${owner}), and(status.eq.1, author.eq.${owner}), and(status.eq.2, author.eq.${owner})`);
 
-    if (author) dbQuery = dbQuery.eq("author", author);
-    
-    let { data: questions, error } = await dbQuery
+  if (author) dbQuery = dbQuery.eq("author", author);
+  if (search) dbQuery = dbQuery.ilike('question', '%' + search + '%');
+  
+  let { data: questions, error } = await dbQuery
     .order("sentAt")
     .range(500 * page, 499 + 500 * page);
     
-  if (search) questions = questions.filter(e => e.question.includes(search));
 
   return { questions, count: questions?.length, error: error ? error : undefined };
 }
@@ -85,7 +85,7 @@ async function post(req, res, authorization) {
   validateFields([
     { condition: !newQuestion.title, message: "Missing question's question." },
     { condition: !newQuestion.options, message: "Missing question's options." },
-    { condition: newQuestion.title.length < 5 || newQuestion.title.length > 150, message: 'Invalid title length. 5 to 150 characters.' },
+    { condition: newQuestion?.title.length < 5 || newQuestion?.title.length > 150, message: 'Invalid title length. 5 to 150 characters.' },
     { condition: newQuestion.description?.length > 350, message: 'Invalid description length. 0 to 350 characters.' },
     { condition: newQuestion.footer?.length > 200, message: 'Invalid footer length. 0 to 200 characters.' }
   ]);
