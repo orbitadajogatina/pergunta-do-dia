@@ -58,12 +58,12 @@ async function reviewQuestion (question, interaction, userIsAdmin, actionType) {
       );
 
       interaction.followUp({embeds: [embed, ...similarQuestions.slice(0, 5)], ephemeral: true, components: similarQuestions.length > 0 ? [deleteButton] : []});
-
-      return;
     } else {
       interaction.followUp({embeds: [embed], ephemeral: true});
     }
   }
+
+  if (userIsAdmin) return;
 
   const buttons = new ActionRowBuilder()
     .addComponents(
@@ -76,8 +76,8 @@ async function reviewQuestion (question, interaction, userIsAdmin, actionType) {
         .setLabel('Recusar')
         .setStyle(ButtonStyle.Danger)
     );
-
-  (await bot.channels.fetch(process.env.MANAGE_CHANNEL_ID)).send({content: actions[actionType].notifications.admin, embeds: [embed, ...similarQuestions], components: [buttons]});
+  
+    (await bot.channels.fetch(process.env.MANAGE_CHANNEL_ID)).send({content: actions[actionType].notifications.admin, embeds: [embed, ...similarQuestions], components: [buttons]});
 }
 
 function wasSentInTheLast24Hours (embed) {
