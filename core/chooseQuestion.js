@@ -59,7 +59,7 @@ const questionsDataByCommand = {
       .or(`sentAt.is.null,sentAt.gte.${twentyFourHoursAgo.format()}}`)
       .order('createdAt', { ascending: false })
       .filter('status', statusFilter?.value.toString() ? 'eq' : 'neq', statusFilter?.value.toString() || -1)
-      .ilike('question', '%' + questionFilterQuery?.value + '%');
+      .ilike('question', '%' + (questionFilterQuery?.value || '') + '%');
     
     return data?.sort((a, b) => a.status - b.status);
   },
@@ -75,7 +75,7 @@ const questionsDataByCommand = {
       .select()
       .eq('author', userID).order('createdAt', { ascending: false })
       .filter('status', statusFilter?.value.toString() ? 'eq' : 'neq', statusFilter?.value.toString() || -1)
-      .ilike('question', '%' + questionFilterQuery?.value + '%');
+      .ilike('question', '%' + (questionFilterQuery?.value || '') + '%');
         
     return data?.sort((a, b) => a.status - b.status);
   },
@@ -89,7 +89,7 @@ const questionsDataByCommand = {
       .eq('status', 2)
       .is('sentAt', null)
       .order('createdAt', { ascending: false })
-      .ilike('question', '%' + questionFilterQuery?.value + '%');
+      .ilike('question', '%' + (questionFilterQuery?.value || '') + '%');
 
     return data;
   },
@@ -104,7 +104,7 @@ const questionsDataByCommand = {
       .is('sentAt', null)
       .order('createdAt', { ascending: false })
       .filter('status', statusFilter?.value.toString() ? 'eq' : 'neq', statusFilter?.value.toString() || -1)
-      .ilike('question', '%' + questionFilterQuery?.value + '%');
+      .ilike('question', '%' + (questionFilterQuery?.value || '') + '%');
 
     return data;
   }
