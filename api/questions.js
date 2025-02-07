@@ -35,7 +35,8 @@ async function getQuestionByID(id, owner) {
   const { data: question } = await database.from('questions').select().eq(column, id.replace('_', '')).single();
   
   if (!question) throw { status: 404, message: "Question doesn't exist." };
-  if (question.status !== 3 && owner !== question.author) throw { status: 403, message: "Forbidden. Question not sent yet and you aren't the owner." };
+  console.log(owner)
+  if (question.status !== 3 && (owner !== question.author && !admins.includes(owner))) throw { status: 403, message: "Forbidden. Question not sent yet and you aren't the owner." };
 
   // Obter e limpar dados do usuário
   const discordUser = await bot.users.fetch(question.author);
