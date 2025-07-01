@@ -13,7 +13,7 @@ function initializeWeb() {
 
   web.get("/", (_, res) =>
     res.send(
-      '<div>❔📆🥰 - Pergunta do Dia no ar!</div><br><br><div style="font-weight: bold;">Confira o bacaníssimo cliente web oficial em: - ainda tá sendo desenvolvido -</div>'
+      '<div>❔📆🥰 - Pergunta do Dia no ar!</div><br><br><div style="font-weight: bold;">Confira o bacaníssimo cliente web oficial em: <a href="https://pergunta-do-dia-web.vercel.app">https://pergunta-do-dia-web.vercel.app</a></div>'
     )
   );
 
