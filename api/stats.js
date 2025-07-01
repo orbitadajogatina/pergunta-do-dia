@@ -2,7 +2,24 @@ const moment = require("moment-timezone");
 
 async function get(req) {
   const { query } = req;
-  const { data: questionsData } = await database.from("questions").select("status,author");
+
+  const questionsData = [];
+  let from = 0;
+  const pageSize = 1000;
+  let done = false;
+
+  while (!done) {
+    const { data, error } = await database
+      .from("questions")
+      .select("status,author")
+      .range(from, from + pageSize - 1);
+
+    if (error) throw error;
+
+    questionsData.push(...data);
+    if (data.length < pageSize) done = true;
+    from += pageSize;
+  }
 
   const questionStatusCounts = questionsData.reduce((acc, { status }) => {
     acc[status] = (acc[status] || 0) + 1;
