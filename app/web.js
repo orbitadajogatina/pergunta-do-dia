@@ -31,8 +31,8 @@ function initializeWeb() {
     await resolveEndpoint(req, res, endpoint, method, apiAuthorization);
   });
 
-  web.listen(3000, () =>
-    console.log("API e site disponível em http://localhost:3000")
+  web.listen(process.env.PORT, () =>
+    console.log("API e site disponível em http://localhost:" + process.env.PORT)
   );
 }
 
