@@ -52,7 +52,7 @@ async function execute(interaction) {
       .setColor("#b40101")
       .setTitle(profile.name)
       .setURL(YORK_URL + "/perfil/" + profile.username)
-      .setDescription(`@${profile.username}\n${profile.bio}`)
+      .setDescription(`@${profile.username}\n${profile.bio ?? ''}`)
       .setThumbnail(profile.avatar || null);
 
     const continueButton = new ButtonBuilder()
