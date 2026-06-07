@@ -38,6 +38,8 @@ async function executeNotSent (interaction, statusNumber) {
   const reason = interaction?.fields?.getTextInputValue('reason');
   let embed = message.embeds[0].data;
 
+  const question = await database.from('questions').select('status').eq('id', questionID);
+
   database.from('questions').update({ status: statusNumber }).eq('id', questionID).select().then(async res => {
     if (res.error) throw res.error;
 
@@ -46,6 +48,10 @@ async function executeNotSent (interaction, statusNumber) {
 
     const authorDM = await bot.users.fetch(res.data[0].author);
     authorDM.send({content: `**${['Puxa...', 'Boa notícia!'][statusNumber - 1]}** Esta pergunta foi ${statusText.toLowerCase()}. ${statusNumber == 1 ? `Quem sabe ela pode ser aceita se você editá-la.${reason ? '\n\n**Motivo:** ' + reason : ''}` : 'Será enviada sabe-se lá quando.'}`, embeds: [embed]});
+
+    if (question.status == 0 && statusNumber == 2) {
+      newQuestionReward(question.author, questionID);
+    }
   });
 }
 

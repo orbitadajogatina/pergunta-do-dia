@@ -2,6 +2,7 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const moment = require('moment-timezone');
 const transformQuestionsDataToEmbed = require('./transformQuestionsDataToEmbed');
 const { parseOptions, parseImage } = require('./parseFields');
+const { newQuestionReward } = require('./yorkIntegration');
 
 async function checkAndParseQuestion (question, options, description, footer, image, author, status) {
   const arrayOptions = await parseOptions(options);
@@ -63,7 +64,10 @@ async function reviewQuestion (question, interaction, userIsAdmin, actionType) {
     }
   }
 
-  if (userIsAdmin) return;
+  if (userIsAdmin) {
+    newQuestionReward(question.author, question.id);
+    return;
+  };
 
   const buttons = new ActionRowBuilder()
     .addComponents(
