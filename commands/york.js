@@ -8,7 +8,7 @@ const {
 const axios = require("axios");
 
 const properties = new SlashCommandBuilder()
-  .setName("conectar-york")
+  .setName("vincular-york")
   .setDescription("Vincule sua conta do York e ganhe Caroços!")
   .addStringOption((option) =>
     option
