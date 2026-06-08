@@ -1,9 +1,10 @@
 "use strict";
 
 const express = require("express");
-const cors = require('cors');
+const cors = require("cors");
 const { resolveEndpoint } = require("../utils/resolveEndpoint");
 const { apiAuthorization } = require("../utils/apiAuthorization");
+const { confirmSkipQueue } = require("../core/yorkIntegration");
 
 const web = express();
 
@@ -13,15 +14,15 @@ function initializeWeb() {
 
   web.get("/", (_, res) =>
     res.send(
-      '<div>❔📆🥰 - Pergunta do Dia no ar!</div><br><br><div style="font-weight: bold;">Confira o bacaníssimo cliente web oficial em: <a href="https://pergunta-do-dia-web.vercel.app">https://pergunta-do-dia-web.vercel.app</a></div>'
-    )
+      '<div>❔📆🥰 - Pergunta do Dia no ar!</div><br><br><div style="font-weight: bold;">Confira o bacaníssimo cliente web oficial em: <a href="https://pergunta-do-dia-web.vercel.app">https://pergunta-do-dia-web.vercel.app</a></div>',
+    ),
   );
 
   web.get("/api/", async (req, res) => {
     res
       .status(200)
       .send(
-        `No momento, a única forma de obter uma chave da API é utilizando o comando /token pelo bot no Discord. Observe que, se você já tem uma chave, utilizar o comando te trará uma nova chave e fará a antiga ser inutilizável.`
+        `No momento, a única forma de obter uma chave da API é utilizando o comando /token pelo bot no Discord. Observe que, se você já tem uma chave, utilizar o comando te trará uma nova chave e fará a antiga ser inutilizável.`,
       );
   });
 
@@ -31,8 +32,26 @@ function initializeWeb() {
     await resolveEndpoint(req, res, endpoint, method, apiAuthorization);
   });
 
+  web.post("/webhook/york", async (req, res) => {
+    const { secret } = req.query;
+
+    if (secret !== process.env.WEBHOOK_SECRET) {
+      return res.status(403).json({ error: "invalid secret" });
+    }
+
+    const body = req.body;
+    if (body.event == "transactions.paid") {
+      const transaction = body.data;
+      confirmSkipQueue(transaction);
+    }
+
+    return res.status(200).json({ ok: true });
+  });
+
   web.listen(process.env.PORT, () =>
-    console.log("API e site disponível em http://localhost:" + process.env.PORT)
+    console.log(
+      "API e site disponível em http://localhost:" + process.env.PORT,
+    ),
   );
 }
 

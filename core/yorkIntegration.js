@@ -59,4 +59,40 @@ async function newQuestionReward(discordUserID, questionID) {
   }
 }
 
-module.exports = { payTransaction, createTransaction, newQuestionReward };
+async function confirmSkipQueue(transaction) {
+  const { user_id, channel_id, message_id } = transaction.metadata;
+
+  const { data: existing, error } = await database
+    .from("queue")
+    .select("amount, transaction_ids")
+    .eq("user_id", user_id)
+    .single();
+
+  if (existing) {
+    await database.from("queue").upsert({
+      user_id,
+      amount: existing.amount + transaction.amount,
+      transaction_ids: [...existing.transaction_ids, transaction.id],
+    });
+  } else {
+    await database.from("queue").upsert({
+      user_id,
+      amount: transaction.amount,
+      transaction_ids: [transaction.id],
+    });
+  }
+
+  const channel = await bot.channels.fetch(channel_id);
+  const message = await channel.messages.fetch(message_id);
+  await message.edit({
+    content: message.content.replace("🟡 Pendente", "✅ Concluído"),
+    components: [],
+  });
+}
+
+module.exports = {
+  payTransaction,
+  createTransaction,
+  newQuestionReward,
+  confirmSkipQueue,
+};
