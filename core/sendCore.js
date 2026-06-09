@@ -9,7 +9,7 @@ const Jimp = require('jimp');
 
 async function chooseQuestion () {
   let lastQuestionsAuthors = JSON.parse((await database.from('variables').select().eq('key', 'lastQuestionsAuthors')).data[0]?.value || '[]');
-  const { data: skipQueue } = await database.from('queue').select().order('amount', { ascending: false });
+  const { data: skipQueue } = await database.from('queue').select().order('amount', { ascending: false }).order('created_at', { ascending: true });;
 
   const { data: questionsData } = await database.from('questions').select().eq('status', 2).is('sentAt', null);
   let filteredQuestions = [];
