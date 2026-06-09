@@ -1,7 +1,7 @@
 <div align="center">
    <img src="/public/logo.png" width="100" height="100" />
    
-   # Pergunta do Dia (v1.2.6)
+   # Pergunta do Dia (v1.3.0)
    
    O **Pergunta do Dia** é um bot projetado para servidores Discord, permitindo a interação diária entre membros por meio de perguntas cuidadosamente selecionadas. Ele envia perguntas diárias para um canal designado em seu servidor Discord, fomentando conversas, debates e trocas de ideias entre os membros. É uma ferramenta ideal para fortalecer comunidades e conhecer as opiniões das pessoas de forma divertida e interativa.
 </div>
@@ -66,6 +66,11 @@ ADMIN_ROLE_ID=id-do-cargo-de-gerenciamento-de-perguntas
 BACKUP_CHANNEL_ID=id-do-canal-de-backup-do-banco-de-dados
 SUPER_ADMIN_ID=id-do-administrador-principal
 SUPER_ADMIN_NAME=nome-do-administrador-principal
+PORT=porta-em-que-o-servidor-vai-subir
+YORK_URL=url-do-york
+YORK_API_TOKEN=api-de-conta-do-york
+YORK_WALLET_API_TOKEN=api-da-carteira-do-york
+WEBHOOK_SECRET=senha-para-verificar-webhooks
 ```
 
 > Mais dúvidas use de base o arquivo [`.env.example`](/.env.example)
