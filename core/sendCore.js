@@ -9,18 +9,34 @@ const Jimp = require('jimp');
 
 async function chooseQuestion () {
   let lastQuestionsAuthors = JSON.parse((await database.from('variables').select().eq('key', 'lastQuestionsAuthors')).data[0]?.value || '[]');
+  const { data: skipQueue } = await database.from('queue').select().order('amount', { ascending: false });
 
   const { data: questionsData } = await database.from('questions').select().eq('status', 2).is('sentAt', null);
-  let filteredQuestions = questionsData.filter(question => !lastQuestionsAuthors.includes(question.author));
+  let filteredQuestions = [];
+
+  for (let i = 0; i < skipQueue.length; i++) {
+    const skipQueueUserID = skipQueue[i].user_id;
+    const skipQueueQuestionsFiltered = questionsData.filter(question => question.author == skipQueueUserID);
+    
+    if (skipQueueQuestionsFiltered.length > 0) {
+      filteredQuestions = skipQueueQuestionsFiltered;
+      await database.from('queue').delete().eq('user_id', skipQueueUserID)
+      break;
+    }
+  }
+
   if (filteredQuestions.length == 0) {
-    lastQuestionsAuthors = [];
-    filteredQuestions = questionsData;
+    filteredQuestions = questionsData.filter(question => !lastQuestionsAuthors.includes(question.author));
+    if (filteredQuestions.length == 0) {
+      lastQuestionsAuthors = [];
+      filteredQuestions = questionsData;
+    }
   }
   
   const luckNumber = Math.floor(Math.random() * filteredQuestions.length);
   const chosenQuestion = filteredQuestions[0] ? filteredQuestions[luckNumber] : await checkIfQuestionAlreadyExist(await generateQuestion());
   
-  lastQuestionsAuthors.push(chosenQuestion.author);
+  if (!lastQuestionsAuthors.includes(chosenQuestion.author)) lastQuestionsAuthors.push(chosenQuestion.author);
   await database.from('variables').upsert({ key: 'lastQuestionsAuthors', value: JSON.stringify(lastQuestionsAuthors) });
 
   return chosenQuestion;
