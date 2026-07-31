@@ -95,10 +95,10 @@ O bot possui uma API para gerenciar perguntas e outras funcionalidades. Consulte
 
 ### Problema 1: Bot não conecta ao Discord
 
-- Verifique se o token no `.env` está correto.
+- Verifique se o token no `.env` está correto;
 - Confirme que o bot foi adicionado ao servidor com as permissões corretas.
 
 ### Problema 2: Dependências não instalam
 
-- Certifique-se de que o Node.js e o npm estão atualizados.
+- Certifique-se de que o Node.js e o npm estão atualizados;
 - Use `npm install --force` para forçar a instalação.
