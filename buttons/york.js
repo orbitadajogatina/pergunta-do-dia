@@ -15,7 +15,7 @@ function link(interaction) {
       if (e.error) throw e;
       interaction.update({
         content:
-          "✅ Parabéns! **Conta vinculada com sucesso.** Agora você vai ganhar 100 Caroços a cada pergunta aprovada!",
+          "✅ Parabéns! **Conta vinculada com sucesso.** Agora você vai ganhar 200 Caroços a cada pergunta aprovada!",
         components: [],
       });
     })

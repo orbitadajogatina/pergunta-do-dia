@@ -42,7 +42,7 @@ async function newQuestionReward(discordUserID, questionID) {
 
   const transferRaw = JSON.stringify({
     receiver_id: yorkLink.york_user_id,
-    amount: 100,
+    amount: 200,
     currency: "caroços",
     type: "reward",
     metadata: {
